@@ -13,7 +13,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;color:#1e293
 .header h1{font-size:17px;font-weight:700}
 .header span{font-size:12px;color:#94a3b8;margin-left:auto}
 .tabs-wrap{background:#fff;border-bottom:2px solid #e2e8f0}
-.tabs{max-width:1100px;margin:0 auto;display:flex;padding:0;gap:2px;overflow-x:visible}
+.tabs{max-width:1100px;margin:0 auto;display:flex;padding:0;gap:2px;overflow-x:auto}
 .tab{padding:14px 18px;cursor:pointer;font-size:12px;font-weight:600;color:#64748b;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:.15s}
 .tab:hover{color:#3b82f6}.tab.active{color:#3b82f6;border-bottom-color:#3b82f6}
 .page{display:none;padding:24px;max-width:1100px;margin:0 auto}.page.active{display:block}
@@ -60,10 +60,11 @@ tbody tr:last-child td{border-bottom:none}
 .saldo-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
 .saldo-hdr .cols{display:flex;gap:32px}
 .saldo-hdr .col-hdr{font-size:11px;font-weight:700;min-width:90px;text-align:right}
-.comp-row{cursor:default}.comp-row.expandable{cursor:pointer;transition:.15s}
+.comp-row{cursor:default}
+.comp-row.expandable{cursor:pointer;transition:.15s}
 .comp-row.expandable:hover{background:#f5f3ff !important}
-.comp-row.expandable td:first-child::before{content:'▶ ';font-size:10px;color:#7c3aed;display:inline-block}
-.comp-row.expandable.open td:first-child::before{transform:rotate(90deg)}
+.comp-row.expandable td:first-child::before{content:'▶ ';font-size:10px;color:#7c3aed}
+.comp-row.expandable.open td:first-child::before{content:'▼ '}
 .comp-sub-row{background:#faf5ff !important}
 .comp-sub-row td{font-size:11px;color:#374151;padding:6px 10px 6px 28px !important}
 .comp-sub-row:hover{background:#f3e8ff !important}
@@ -111,25 +112,20 @@ tbody tr:last-child td{border-bottom:none}
   <div class="cards cards-4" id="nb-cards"></div>
   <div class="filter-row">
     <input class="search-input" id="nb-search" placeholder="🔍 Buscar…" oninput="renderNubank()">
-    <button class="filter-btn active" onclick="setNbFilter(this,'todos')">Todos</button>
-    <button class="filter-btn" onclick="setNbFilter(this,'Parcelado')">Parcelado</button>
-    <button class="filter-btn" onclick="setNbFilter(this,'Pontual')">Pontual</button>
-    <button class="filter-btn" onclick="setNbFilter(this,'Assinatura')">Assinatura</button>
-    <button class="filter-btn" onclick="setNbFilter(this,'Pagamento')">Pagamento</button>
+    <button class="filter-btn active" onclick="setFilter('nb',this,'todos')">Todos</button>
+    <button class="filter-btn" onclick="setFilter('nb',this,'Parcelado')">Parcelado</button>
+    <button class="filter-btn" onclick="setFilter('nb',this,'Pontual')">Pontual</button>
+    <button class="filter-btn" onclick="setFilter('nb',this,'Assinatura')">Assinatura</button>
+    <button class="filter-btn" onclick="setFilter('nb',this,'Pagamento')">Pagamento</button>
   </div>
   <table><thead><tr><th>Descrição</th><th>Responsável</th><th>Modo</th><th>Categoria</th><th>Valor Total</th><th>Parcela</th><th>Progresso</th></tr></thead>
   <tbody id="nb-body"></tbody></table>
 </div>
 
 <div id="tab-itau" class="page">
-  <div class="cards cards-4">
-    <div class="card"><div class="card-label">Total Itaú</div><div class="card-value" style="font-size:18px">R$ 0,00</div></div>
-    <div class="card bg-gui"><div class="card-label">Guilherme</div><div class="card-value c-gui" style="font-size:18px">R$ 0,00</div></div>
-    <div class="card bg-ste"><div class="card-label">Stella</div><div class="card-value c-ste" style="font-size:18px">R$ 0,00</div></div>
-    <div class="card"><div class="card-label">Pais</div><div class="card-value c-pais" style="font-size:18px">R$ 0,00</div></div>
-  </div>
+  <div class="cards cards-4" id="it-cards"></div>
   <table><thead><tr><th>Descrição</th><th>Responsável</th><th>Modo</th><th>Categoria</th><th>Valor Total</th><th>Parcela</th><th>Progresso</th></tr></thead>
-  <tbody><tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:32px">Nenhum gasto no Itaú este mês</td></tr></tbody></table>
+  <tbody id="it-body"></tbody></table>
 </div>
 
 <div id="tab-contas" class="page">
@@ -140,9 +136,18 @@ tbody tr:last-child td{border-bottom:none}
 
 <div id="tab-nuconta" class="page">
   <div class="cards cards-3" id="nuconta-cards"></div>
-  <div class="section-title">Movimentações</div>
-  <table><thead><tr><th>Descrição</th><th>Guilherme</th><th>Stella</th><th>Turbo</th></tr></thead>
-  <tbody id="nuconta-body"></tbody></table>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:16px">
+    <div>
+      <div class="section-title">Movimentações Caixinha</div>
+      <table><thead><tr><th>Descrição</th><th style="text-align:right">Valor</th></tr></thead>
+      <tbody id="nuconta-body"></tbody></table>
+    </div>
+    <div>
+      <div class="section-title">Poupança / NuConta</div>
+      <table><thead><tr><th>Descrição</th><th style="text-align:right">Valor</th></tr></thead>
+      <tbody id="poupanca-body"></tbody></table>
+    </div>
+  </div>
 </div>
 
 <div id="tab-comp" class="page">
@@ -151,7 +156,7 @@ tbody tr:last-child td{border-bottom:none}
     <div class="value" id="comp-total">—</div>
     <div class="sub" id="comp-sub"></div>
   </div>
-  <div class="section-title">Detalhamento <span style="font-size:10px;font-weight:400;color:#94a3b8">— clique em Cartão NuBank para expandir</span></div>
+  <div class="section-title">Detalhamento <span style="font-size:10px;font-weight:400;color:#94a3b8">— clique em Cartão NuBank para ver os lançamentos</span></div>
   <table>
     <thead><tr><th>Descrição</th><th style="text-align:right">Stella paga</th><th style="text-align:right">Guilherme paga</th></tr></thead>
     <tbody id="comp-body"></tbody>
@@ -159,9 +164,13 @@ tbody tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-const R = n => (typeof n==='number'?n:0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const R = n => {
+  const v = typeof n==='number' ? n : parseFloat(n);
+  return isNaN(v) ? 'R$ 0,00' : v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+};
 const num = v => { const n=parseFloat(v); return isNaN(n)?0:n; };
-const str = v => (v==null?'':String(v)).trim();
+const str = v => (v==null ? '' : String(v)).trim();
 
 function showTab(t,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -170,11 +179,13 @@ function showTab(t,el){
   el.classList.add('active');
 }
 function respBadge(r1,r2,r3){
-  const p=!!r3;
-  const m=(r1&&r2)?'<span class="badge badge-amb">Ambos</span>'
-    :r1?'<span class="badge badge-gui">Guilherme</span>'
-    :r2?'<span class="badge badge-ste">Stella</span>':'';
-  return m+(p?'<span class="badge badge-pais" style="margin-left:3px">+Pais</span>':'');
+  const hasPais=!!r3;
+  let m='';
+  if(r1&&r2)  m='<span class="badge badge-amb">Ambos</span>';
+  else if(r1) m='<span class="badge badge-gui">Guilherme</span>';
+  else if(r2) m='<span class="badge badge-ste">Stella</span>';
+  if(hasPais) m+='<span class="badge badge-pais" style="margin-left:3px">+Pais</span>';
+  return m;
 }
 function modoBadge(m){
   const map={Parcelado:'parc',Pontual:'pont',Assinatura:'asin',Pagamento:'pgto'};
@@ -182,16 +193,30 @@ function modoBadge(m){
 }
 function parcBar(paga,n){
   if(!n||n<=1) return '—';
-  const pct=Math.min(100,Math.round((paga||0)/n*100));
-  return `<div class="parc-info"><div class="parc-bar"><div class="parc-fill" style="width:${pct}%"></div></div><span style="font-size:11px;color:#64748b">${paga||0}/${n}</span></div>`;
+  const pct=Math.min(100,Math.round((num(paga)||0)/n*100));
+  return `<div class="parc-info"><div class="parc-bar"><div class="parc-fill" style="width:${pct}%"></div></div><span style="font-size:11px;color:#64748b">${num(paga)||0}/${n}</span></div>`;
 }
-function cellMov(v){
-  if(v===''||v==null) return '<td style="color:#d1d5db;text-align:center">—</td>';
-  return `<td class="money ${v>=0?'money-pos':'money-neg'}" style="text-align:right">${R(v)}</td>`;
+function entryRows(entries){
+  return entries.map(x=>`<tr>
+    <td style="font-weight:600">${x.d}</td>
+    <td>${respBadge(x.r1,x.r2,x.r3)}</td>
+    <td>${modoBadge(x.m)}</td>
+    <td><span class="badge badge-cat">${x.cat||'—'}</span></td>
+    <td class="money">${R(Math.abs(x.vt||0))}</td>
+    <td class="money">${R(Math.abs(x.vp||0))}</td>
+    <td>${parcBar(x.paga,x.n)}</td>
+  </tr>`).join('');
 }
 
-let nbData=[], stellaNbItems=[], compData=[], nbFilter='todos', nbExpanded=false;
+let nbData=[], itData=[], stellaNbItems=[], compData=[], nbFilter='todos';
+let nbExpanded=false;
 
+function setFilter(tab,btn,f){
+  if(tab==='nb') nbFilter=f;
+  btn.closest('.filter-row').querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderNubank();
+}
 function renderNubank(){
   const q=(document.getElementById('nb-search').value||'').toLowerCase();
   const rows=nbData.filter(x=>{
@@ -199,26 +224,14 @@ function renderNubank(){
     if(q&&!x.d.toLowerCase().includes(q)) return false;
     return true;
   });
-  document.getElementById('nb-body').innerHTML=rows.map(x=>`<tr>
-    <td style="font-weight:600">${x.d}</td>
-    <td>${respBadge(x.r1,x.r2,x.r3)}</td>
-    <td>${modoBadge(x.m)}</td>
-    <td><span class="badge badge-cat">${x.cat||'—'}</span></td>
-    <td class="money ${(x.vt||0)<0?'money-neg':''}">${R(Math.abs(x.vt||0))}</td>
-    <td class="money">${R(Math.abs(x.vp||0))}</td>
-    <td>${parcBar(x.paga,x.n)}</td>
-  </tr>`).join('');
-}
-function setNbFilter(btn,f){
-  nbFilter=f;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active'); renderNubank();
+  document.getElementById('nb-body').innerHTML=rows.length ? entryRows(rows)
+    : '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:32px">Nenhum resultado</td></tr>';
 }
 
 function renderComp(){
-  let html=''; let totalVal=0;
+  let html='';
   const totalRow=compData.find(x=>x.isTotal);
-  if(totalRow) totalVal=totalRow.s;
+  const totalVal=totalRow?totalRow.s:0;
   compData.filter(x=>!x.isTotal).forEach(x=>{
     const isExpand=x.expandable;
     html+=`<tr class="comp-row${isExpand?' expandable':''}${isExpand&&nbExpanded?' open':''}"
@@ -230,8 +243,8 @@ function renderComp(){
     if(isExpand&&nbExpanded){
       stellaNbItems.forEach(nb=>{
         html+=`<tr class="comp-sub-row">
-          <td style="padding-left:28px">${nb.d} <span class="badge badge-cat">${nb.cat||'—'}</span></td>
-          <td style="text-align:right;font-weight:700;color:#be123c">${R(num(nb.vr))}</td>
+          <td>${nb.d} <span class="badge badge-cat">${nb.cat||'—'}</span></td>
+          <td style="text-align:right;font-weight:700;color:#be123c">${R(Math.abs(num(nb.vr)))}</td>
           <td style="text-align:right;color:#94a3b8">—</td>
         </tr>`;
       });
@@ -246,138 +259,162 @@ function renderComp(){
 }
 function toggleNb(){nbExpanded=!nbExpanded;renderComp();}
 
-// ── Parse helpers ─────────────────────────────────────────────────────────────
+// ── Sheet reader ─────────────────────────────────────────────────────────────
 function sheetRows(wb, name){
-  const exact = wb.Sheets[name];
-  if(exact) return XLSX.utils.sheet_to_json(exact,{header:1,defval:null,raw:true});
-  // Fuzzy match: first 6 chars
-  const key = Object.keys(wb.Sheets).find(k=>k.toLowerCase().includes(name.toLowerCase().substring(0,6)));
-  if(key){ console.log('Sheet fuzzy match:',name,'→',key); return XLSX.utils.sheet_to_json(wb.Sheets[key],{header:1,defval:null,raw:true}); }
-  console.warn('Sheet not found:',name,'Available:',Object.keys(wb.Sheets));
+  // Exact match first
+  if(wb.Sheets[name])
+    return XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,defval:null,raw:true});
+  // Partial match (handles typos like "Compensasões")
+  const key=Object.keys(wb.Sheets).find(k=>
+    k.toLowerCase().includes(name.toLowerCase().slice(0,6)));
+  if(key){
+    console.log(`[sheet] fuzzy: "${name}" → "${key}"`);
+    return XLSX.utils.sheet_to_json(wb.Sheets[key],{header:1,defval:null,raw:true});
+  }
+  console.warn(`[sheet] NOT FOUND: "${name}" | available:`, Object.keys(wb.Sheets));
   return [];
 }
 
+// ── Parsers ───────────────────────────────────────────────────────────────────
+
 function parseSaldo(wb){
-  const data = sheetRows(wb,'Saldo');
-  console.log('[Saldo] rows:', data.length, '| first rows:', JSON.stringify(data.slice(0,4)));
-  const result={salGui:0,salSte:0,sobraGui:0,sobraSte:0,nbGui:0,nbSte:0,contasGui:0,contasSte:0,nucontaSte:0,poupancaGui:0};
-  // Discover col positions from header row containing "Guilherme"
-  let guiCol=2, steCol=4;
-  const hdrRow = data.find(r=>r.some(c=>str(c).toLowerCase()==='guilherme'));
-  if(hdrRow){
-    guiCol=hdrRow.findIndex(c=>str(c).toLowerCase()==='guilherme');
-    const si=hdrRow.findIndex(c=>str(c).toLowerCase()==='stella');
-    if(si>-1) steCol=si;
-    console.log('[Saldo] header row:',JSON.stringify(hdrRow),'guiCol=',guiCol,'steCol=',steCol);
-  }
-  // Sobra: row after header
-  const hdrIdx = data.indexOf(hdrRow);
-  if(hdrIdx>=0 && data[hdrIdx+1]){
-    const sr=data[hdrIdx+1];
-    result.sobraGui=num(sr[guiCol]); result.sobraSte=num(sr[steCol]);
-    console.log('[Saldo] sobra row:',JSON.stringify(sr),'→ gui=',result.sobraGui,'ste=',result.sobraSte);
+  const data=sheetRows(wb,'Saldo');
+  const r={salGui:0,salSte:0,sobraGui:0,sobraSte:0,
+    nbGui:0,nbSte:0,contasGui:0,contasSte:0,nucontaSte:0,poupancaGui:0};
+  // Find columns by "Guilherme" / "Stella" header
+  const hdrRow=data.find(row=>row.some(c=>str(c).toLowerCase()==='guilherme'));
+  if(!hdrRow){ console.warn('[Saldo] header not found'); return r; }
+  const guiCol=hdrRow.findIndex(c=>str(c).toLowerCase()==='guilherme');
+  const steCol=hdrRow.findIndex(c=>str(c).toLowerCase()==='stella');
+  const lblCol=guiCol-1; // column just before Guilherme = labels
+  console.log('[Saldo] guiCol=',guiCol,'steCol=',steCol,'lblCol=',lblCol);
+  // Sobra: row immediately after header
+  const hi=data.indexOf(hdrRow);
+  if(hi>=0&&data[hi+1]){
+    r.sobraGui=num(data[hi+1][guiCol]);
+    r.sobraSte=num(data[hi+1][steCol]);
   }
   for(const row of data){
-    const lbl=str(row[1]);
+    const lbl=str(row[lblCol]);
     const g=num(row[guiCol]), s=num(row[steCol]);
-    if(lbl==='Salário')                      { result.salGui=g; result.salSte=s; }
-    if(lbl==='Cartão NuBank')                { result.nbGui=g;  result.nbSte=s; }
-    if(lbl==='Contas')                       { result.contasGui=g; result.contasSte=s; }
-    if(lbl==='Dinheiro para NuConta')        { result.nucontaSte=s||g; }
-    if(lbl==='Dinheiro Guardado na poupança'){ result.poupancaGui=g; }
+    if(lbl==='Salário')                       { r.salGui=g; r.salSte=s; }
+    if(lbl==='Cartão NuBank')                 { r.nbGui=g;  r.nbSte=s; }
+    if(lbl==='Contas')                        { r.contasGui=g; r.contasSte=s; }
+    if(lbl==='Dinheiro para NuConta')         { r.nucontaSte=s||g; }
+    if(lbl==='Dinheiro Guardado na poupança') { r.poupancaGui=g; }
   }
-  console.log('[Saldo] result:', JSON.stringify(result));
-  return result;
+  console.log('[Saldo]', JSON.stringify(r));
+  return r;
 }
 
-function parseNuBank(wb){
-  const data = sheetRows(wb,'NuBank');
-  console.log('[NuBank] rows:', data.length);
+// Generic entry parser for NuBank / Itaú (same column structure)
+function parseCardEntries(wb, sheetName, totalLabel){
+  const data=sheetRows(wb, sheetName);
+  if(!data.length) return {totals:{total:0,gui:0,ste:0,pais:0}, entries:[]};
+
+  // ── Totals ──
   let totals={total:0,gui:0,ste:0,pais:0};
-  // Find totals: row after "NuBank Total" label
   for(let i=0;i<data.length;i++){
-    if(data[i].some(c=>str(c)==='NuBank Total') && data[i+1]){
-      const tr=data[i+1];
-      console.log('[NuBank] totals header row:',JSON.stringify(data[i]));
-      console.log('[NuBank] totals values row:',JSON.stringify(tr));
-      // Find first numeric column
-      const ci=tr.findIndex((c,j)=>j>0&&typeof c==='number'&&Math.abs(c)>10);
-      if(ci>-1){ totals.total=num(tr[ci]); totals.gui=num(tr[ci+1]); totals.ste=num(tr[ci+2]); totals.pais=num(tr[ci+3]); }
-      break;
+    const row=data[i];
+    const tIdx=row.findIndex(c=>str(c)===totalLabel);
+    if(tIdx<0) continue;
+    const gIdx=row.findIndex(c=>str(c)==='Guilherme');
+    const sIdx=row.findIndex(c=>str(c)==='Stella');
+    const pIdx=row.findIndex(c=>str(c)==='Pais');
+    const vrow=data[i+1];
+    if(vrow){
+      if(tIdx>=0) totals.total=num(vrow[tIdx]);
+      if(gIdx>=0) totals.gui  =num(vrow[gIdx]);
+      if(sIdx>=0) totals.ste  =num(vrow[sIdx]);
+      if(pIdx>=0) totals.pais =num(vrow[pIdx]);
     }
+    console.log(`[${sheetName}] totals:`, JSON.stringify(totals));
+    break;
   }
-  console.log('[NuBank] totals:', JSON.stringify(totals));
-  // Data rows after "Descrição" header
+
+  // ── Entries: find "Descrição" header ──
   const entries=[];
   let descCol=-1, hfound=false;
   for(const row of data){
     if(!hfound){
       const idx=row.findIndex(c=>str(c)==='Descrição');
-      if(idx>-1){ descCol=idx; hfound=true; console.log('[NuBank] descCol=',descCol,'header:',JSON.stringify(row)); continue; }
-    } else {
-      const d=str(row[descCol]);
-      if(!d) continue;
-      // Relative columns from descCol
-      const r1=str(row[descCol+1]), r2=str(row[descCol+2]), r3=str(row[descCol+3]);
-      const div=num(row[descCol+4]);
-      if(div===0) continue;
-      const vt=num(row[descCol+5]);
-      let m=str(row[descCol+6]); if(!m||m==='À vista') m='Pontual';
-      const cat=str(row[descCol+7]);
-      const vp=num(row[descCol+8]), vr=num(row[descCol+9]), n=num(row[descCol+10]);
-      const pagaRaw=row[descCol+13];
-      const paga=pagaRaw!=null?num(pagaRaw):null;
-      entries.push({d,r1,r2,r3,vt,m,cat,vp,vr,n,paga});
+      if(idx<0) continue;
+      descCol=idx; hfound=true;
+      console.log(`[${sheetName}] descCol=`,descCol);
+      continue;
     }
+    const d=str(row[descCol]);
+    if(!d) continue;
+    const div=num(row[descCol+4]);
+    if(div===0) continue;
+    const vt =num(row[descCol+5]);
+    let   m  =str(row[descCol+6]); if(!m||m==='À vista') m='Pontual';
+    const cat=str(row[descCol+7]);
+    const vp =num(row[descCol+8]);
+    const vr =num(row[descCol+9]);
+    const n  =num(row[descCol+10]);
+    const pagaRaw=row[descCol+13];
+    const paga=pagaRaw!=null ? num(pagaRaw) : null;
+    entries.push({
+      d,
+      r1:str(row[descCol+1]), r2:str(row[descCol+2]), r3:str(row[descCol+3]),
+      vt, m, cat, vp, vr, n, paga
+    });
   }
-  console.log('[NuBank] entries:', entries.length, '| first:', JSON.stringify(entries[0]));
+  console.log(`[${sheetName}] entries:`,entries.length,'| first:',JSON.stringify(entries[0]));
   return {totals, entries};
 }
 
 function parseContas(wb){
-  const data = sheetRows(wb,'Contas');
+  const data=sheetRows(wb,'Contas');
   const entries=[];
   let descCol=-1, hfound=false;
   for(const row of data){
     if(!hfound){
       const idx=row.findIndex(c=>str(c)==='Descrição');
-      if(idx>-1){ descCol=idx; hfound=true; continue; }
-    } else {
-      const d=str(row[descCol]);
-      if(!d) continue;
-      if(num(row[descCol+4])===0) continue;
-      entries.push({
-        d, r1:str(row[descCol+1]), r2:str(row[descCol+2]), r3:str(row[descCol+3]),
-        v:num(row[descCol+5]), pr:num(row[descCol+7])
-      });
+      if(idx<0) continue;
+      descCol=idx; hfound=true; continue;
     }
+    const d=str(row[descCol]);
+    if(!d) continue;
+    const div=num(row[descCol+4]);
+    if(div===0) continue;
+    entries.push({
+      d,
+      r1:str(row[descCol+1]), r2:str(row[descCol+2]), r3:str(row[descCol+3]),
+      v:num(row[descCol+5]),
+      pr:num(row[descCol+7])
+    });
   }
-  console.log('[Contas] entries:', entries.length, '| first:', JSON.stringify(entries[0]));
+  console.log('[Contas] entries:',entries.length,'| first:',JSON.stringify(entries[0]));
   return entries;
 }
 
 function parseComp(wb){
-  const names=['Compensasões e Transferências','Compensações e Transferências','Compensações','Compensasões'];
-  let data=[], foundName='';
-  for(const n of names){ const d=sheetRows(wb,n); if(d.length>0){ data=d; foundName=n; break; } }
-  console.log('[Comp] sheet:',foundName,'rows:',data.length);
+  const data=sheetRows(wb,'Compensas'); // fuzzy matches "Compensasões..."
+  // ── Discover columns ──
+  const hdrRow=data.find(row=>row.some(c=>str(c)==='Stella'));
+  if(!hdrRow){ console.warn('[Comp] header not found'); return {items:[],total:0}; }
+  const steCol=hdrRow.findIndex(c=>str(c)==='Stella');
+  const guiCol=hdrRow.findIndex(c=>str(c)==='Guilherme');
+  const lblCol=steCol-1; // label column is just before Stella
+  console.log('[Comp] lblCol=',lblCol,'steCol=',steCol,'guiCol=',guiCol);
   const items=[];
-  // Find Stella/Guilherme column positions
-  let steCol=2, guiCol=3;
-  const hdrRow=data.find(r=>r.some(c=>str(c)==='Stella'));
-  if(hdrRow){
-    steCol=hdrRow.findIndex(c=>str(c)==='Stella');
-    const gi=hdrRow.findIndex(c=>str(c)==='Guilherme');
-    if(gi>-1) guiCol=gi;
-    console.log('[Comp] header:',JSON.stringify(hdrRow),'steCol=',steCol,'guiCol=',guiCol);
-  }
   for(const row of data){
-    const lbl=str(row[1]);
+    const rawLbl=row[lblCol];
+    if(rawLbl==null) continue;
+    const lbl=str(rawLbl);
     if(!lbl||lbl==='Stella'||lbl==='Guilherme') continue;
-    const s=num(row[steCol]), g=num(row[guiCol]);
-    if(lbl.toLowerCase().includes('stella tem que')){ items.push({isTotal:true,d:lbl,s,g:0}); continue; }
-    const isSub=row[1]!=null&&String(row[1]).startsWith(' ');
-    items.push({d:lbl.replace(/^\s+/,''), s, g, isSub, expandable:lbl.trim()==='Cartão NuBank'});
+    const s=num(row[steCol]);
+    const g=guiCol>=0 ? num(row[guiCol]) : 0;
+    if(lbl.toLowerCase().includes('stella tem que')){
+      items.push({isTotal:true, d:lbl, s, g:0}); continue;
+    }
+    const isSub=String(rawLbl).startsWith(' ');
+    items.push({
+      d: lbl, s, g, isSub,
+      expandable: lbl==='Cartão NuBank'
+    });
   }
   const totalRow=items.find(x=>x.isTotal);
   console.log('[Comp] items:',items.length,'total:',totalRow?.s);
@@ -385,41 +422,79 @@ function parseComp(wb){
 }
 
 function parseNuConta(wb){
-  const data = sheetRows(wb,'NuConta e Poupança');
-  console.log('[NuConta] rows:', data.length);
-  let caixGui=0,caixSte=0,caixTurbo=0;
-  // Discover caixinha columns
-  let caixGuiCol=6, caixSteCol=7, caixTurboCol=8;
+  const data=sheetRows(wb,'NuConta');
+  let caixGui=0, caixSte=0, caixTurbo=0;
+  let caixGuiName='Caixinha Guilherme', caixSteName='Caixinha Stella', caixTurboName='Caixinha Turbo';
+  let caixGuiCol=-1, caixSteCol=-1, caixTurboCol=-1;
+  const movsCaixinha=[], movsPoupanca=[];
+
+  // ── Find caixinha header row ──
   for(const row of data){
-    const idx=row.findIndex(c=>str(c)==='Caixinha Guilherme');
-    if(idx>-1){ caixGuiCol=idx; caixSteCol=idx+1; caixTurboCol=idx+2;
-      console.log('[NuConta] caixinha hdr:',JSON.stringify(row),'col=',idx); break; }
+    const idx=row.findIndex(c=>str(c)==='Caixinha Guilherme'||str(c)==='Caixinha Stella');
+    if(idx<0) continue;
+    // Normalize: find both
+    const guiIdx=row.findIndex(c=>str(c)==='Caixinha Guilherme');
+    const steIdx=row.findIndex(c=>str(c)==='Caixinha Stella');
+    if(guiIdx>=0){
+      caixGuiCol=guiIdx; caixGuiName=str(row[guiIdx]);
+      caixSteCol=guiIdx+1; caixSteName=str(row[guiIdx+1])||'Caixinha Stella';
+      caixTurboCol=guiIdx+2; caixTurboName=str(row[guiIdx+2])||'Caixinha Turbo';
+    } else if(steIdx>=0){
+      caixSteCol=steIdx; caixSteName=str(row[steIdx]);
+      caixGuiCol=steIdx-1; caixGuiName='Caixinha Guilherme';
+      caixTurboCol=steIdx+1; caixTurboName=str(row[steIdx+1])||'Caixinha Turbo';
+    }
+    console.log('[NuConta] caixa cols: gui=',caixGuiCol,'ste=',caixSteCol,'turbo=',caixTurboCol);
+    break;
   }
-  // "Sem turbo" row = balances
+
+  // ── Find "Sem turbo" row for balances ──
   for(const row of data){
     if(row.some(c=>str(c)==='Sem turbo')){
-      caixGui=num(row[caixGuiCol]); caixSte=num(row[caixSteCol]); caixTurbo=num(row[caixTurboCol]);
-      console.log('[NuConta] sem turbo row:',JSON.stringify(row),'→',caixGui,caixSte,caixTurbo); break;
+      if(caixGuiCol>=0)   caixGui  =num(row[caixGuiCol]);
+      if(caixSteCol>=0)   caixSte  =num(row[caixSteCol]);
+      if(caixTurboCol>=0) caixTurbo=num(row[caixTurboCol]);
+      console.log('[NuConta] sem turbo balances: gui=',caixGui,'ste=',caixSte,'turbo=',caixTurbo);
+      break;
     }
   }
-  // Movements
-  const skip=new Set(['','Total','Movimentação','Saldo inicial','IPVAs + Licenciamento',
-    'Caixinha Guilherme','Caixinha Stella','Caixinha Turbo','Com turbo','Sem turbo']);
-  const movs=[];
+
+  // ── Find movements: "Movimentação" label column ──
+  // Left-side caixinha movements (around col 5): look for 'Movimentação' in the LEFT block
+  // Right-side poupança movements: look for 'Movimentação' further right
+  // Strategy: find ALL 'Movimentação' labels and handle each block
+  const movDescCols=[];
   for(const row of data){
-    const d=str(row[5]);
-    if(!d||skip.has(d)) continue;
-    if(typeof row[6]==='number') movs.push({d, g:num(row[6])});
+    row.forEach((c,i)=>{ if(str(c)==='Movimentação'&&!movDescCols.includes(i)) movDescCols.push(i); });
   }
-  return {caixGui,caixSte,caixTurbo,movs};
+  console.log('[NuConta] movDescCols:',movDescCols);
+
+  const skipLabels=new Set(['','Saldo inicial','Movimentação','Total','IPVAs + Licenciamento',
+    'Com turbo','Sem turbo','Caixinha Guilherme','Caixinha Stella','Caixinha Turbo','Para retirar mês que vem?']);
+
+  for(const movDescCol of movDescCols){
+    const movValCol=movDescCol+2; // value is always 2 cols after description
+    const isCaixinha=(caixGuiCol>=0 && movDescCol < caixGuiCol); // left side = caixinha
+    for(const row of data){
+      const d=str(row[movDescCol]);
+      if(!d||skipLabels.has(d)) continue;
+      const v=row[movValCol];
+      if(v==null||typeof v!=='number') continue;
+      if(isCaixinha) movsCaixinha.push({d, v});
+      else           movsPoupanca.push({d, v});
+    }
+  }
+  console.log('[NuConta] caixinha movs:',movsCaixinha.length,'poupanca movs:',movsPoupanca.length);
+
+  return {caixGui,caixSte,caixTurbo,caixGuiName,caixSteName,caixTurboName,movsCaixinha,movsPoupanca};
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
-function renderAll(saldo, nb, contas, comp, nuconta){
+function renderAll(saldo, nb, itau, contas, comp, nuconta){
   document.getElementById('header-info').textContent=
     `Atualizado em ${new Date().toLocaleDateString('pt-BR')}`;
 
-  // Saldo
+  // ── Saldo ──
   document.getElementById('saldo-sal-cards').innerHTML=`
     <div class="card bg-gui"><div class="card-label">Salário — Guilherme</div><div class="card-value c-gui">${R(saldo.salGui)}</div></div>
     <div class="card bg-ste"><div class="card-label">Salário — Stella</div><div class="card-value c-ste">${R(saldo.salSte)}</div></div>`;
@@ -428,9 +503,8 @@ function renderAll(saldo, nb, contas, comp, nuconta){
     <div class="card bg-grn"><div class="card-label">Sobra — Stella</div><div class="card-value c-grn">${R(saldo.sobraSte)}</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">Após todos os gastos</div></div>`;
   document.getElementById('saldo-rows').innerHTML=`
     <div class="saldo-row"><span class="lbl">💰 Salário</span><div class="vals"><span class="val c-gui">${R(saldo.salGui)}</span><span class="val c-ste">${R(saldo.salSte)}</span></div></div>
-    <div class="saldo-row"><span class="lbl">💳 Cartão Itaú</span><div class="vals"><span class="val money-neg">— ${R(0)}</span><span class="val money-neg">— ${R(0)}</span></div></div>
+    <div class="saldo-row"><span class="lbl">💳 Cartão Itaú</span><div class="vals"><span class="val money-neg">— ${R(itau.totals.gui)}</span><span class="val money-neg">— ${R(itau.totals.ste)}</span></div></div>
     <div class="saldo-row"><span class="lbl">💜 Cartão NuBank</span><div class="vals"><span class="val money-neg">— ${R(saldo.nbGui)}</span><span class="val money-neg">— ${R(saldo.nbSte)}</span></div></div>
-    <div class="saldo-row"><span class="lbl">↔️ Compensação NuBank</span><div class="vals"><span class="val money-neg">— ${R(saldo.nbGui)}</span><span class="val money-neg">— ${R(saldo.nbSte)}</span></div></div>
     <div class="saldo-row"><span class="lbl">🏠 Contas Fixas</span><div class="vals"><span class="val money-neg">— ${R(saldo.contasGui)}</span><span class="val money-neg">— ${R(saldo.contasSte)}</span></div></div>
     <div class="saldo-row"><span class="lbl">🏦 NuConta/Poupança</span><div class="vals">
       <span class="val ${saldo.poupancaGui>=0?'c-grn':'money-neg'}">${saldo.poupancaGui>=0?'+ ':'— '}${R(Math.abs(saldo.poupancaGui))}</span>
@@ -441,9 +515,9 @@ function renderAll(saldo, nb, contas, comp, nuconta){
       <div class="vals"><span class="val c-grn" style="font-size:14px">${R(saldo.sobraGui)}</span><span class="val c-grn" style="font-size:14px">${R(saldo.sobraSte)}</span></div>
     </div>`;
 
-  // NuBank
+  // ── NuBank ──
   nbData=nb.entries;
-  stellaNbItems=nbData.filter(x=>x.r2==='Stella'||x.r1==='Stella');
+  stellaNbItems=nbData.filter(x=>x.r2==='Stella');
   document.getElementById('nb-cards').innerHTML=`
     <div class="card"><div class="card-label">Total NuBank</div><div class="card-value" style="font-size:18px">${R(nb.totals.total)}</div></div>
     <div class="card bg-gui"><div class="card-label">Guilherme</div><div class="card-value c-gui" style="font-size:18px">${R(nb.totals.gui)}</div></div>
@@ -451,30 +525,47 @@ function renderAll(saldo, nb, contas, comp, nuconta){
     <div class="card"><div class="card-label">Pais</div><div class="card-value c-pais" style="font-size:18px">${R(nb.totals.pais)}</div></div>`;
   renderNubank();
 
-  // Contas
+  // ── Itaú ──
+  itData=itau.entries;
+  document.getElementById('it-cards').innerHTML=`
+    <div class="card"><div class="card-label">Total Itaú</div><div class="card-value" style="font-size:18px">${R(itau.totals.total)}</div></div>
+    <div class="card bg-gui"><div class="card-label">Guilherme</div><div class="card-value c-gui" style="font-size:18px">${R(itau.totals.gui)}</div></div>
+    <div class="card bg-ste"><div class="card-label">Stella</div><div class="card-value c-ste" style="font-size:18px">${R(itau.totals.ste)}</div></div>
+    <div class="card"><div class="card-label">Pais</div><div class="card-value c-pais" style="font-size:18px">${R(itau.totals.pais)}</div></div>`;
+  document.getElementById('it-body').innerHTML=itData.length ? entryRows(itData)
+    : '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:32px">Nenhum gasto no Itaú este mês</td></tr>';
+
+  // ── Contas ──
   const totalContas=contas.reduce((a,x)=>a+num(x.v),0);
   document.getElementById('contas-cards').innerHTML=`
     <div class="card"><div class="card-label">Total Contas</div><div class="card-value" style="font-size:18px">${R(totalContas)}</div></div>
     <div class="card bg-gui"><div class="card-label">Guilherme</div><div class="card-value c-gui" style="font-size:18px">${R(saldo.contasGui)}</div></div>
     <div class="card bg-ste"><div class="card-label">Stella</div><div class="card-value c-ste" style="font-size:18px">${R(saldo.contasSte)}</div></div>`;
   document.getElementById('contas-body').innerHTML=contas.map(x=>`<tr>
-    <td style="font-weight:600">${x.d}</td><td>${respBadge(x.r1,x.r2,x.r3)}</td>
-    <td class="money">${R(x.v)}</td><td class="money">${R(x.pr)}</td>
+    <td style="font-weight:600">${x.d}</td>
+    <td>${respBadge(x.r1,x.r2,x.r3)}</td>
+    <td class="money">${R(x.v)}</td>
+    <td class="money">${R(x.pr)}</td>
   </tr>`).join('');
 
-  // NuConta
+  // ── NuConta ──
   document.getElementById('nuconta-cards').innerHTML=`
-    <div class="card bg-gui"><div class="card-label">Caixinha Guilherme</div><div class="card-value c-gui">${R(nuconta.caixGui)}</div></div>
-    <div class="card bg-ste"><div class="card-label">Caixinha Stella</div><div class="card-value c-ste">${R(nuconta.caixSte)}</div></div>
-    <div class="card bg-amb"><div class="card-label">Caixinha Turbo</div><div class="card-value c-amb">${R(nuconta.caixTurbo)}</div></div>`;
-  document.getElementById('nuconta-body').innerHTML=nuconta.movs.map((x,i)=>`
-    <tr style="background:${i%2===0?'#fff':'#f8fafc'}">
-      <td>${x.d}</td>${cellMov(x.g)}
-      <td style="color:#d1d5db;text-align:center">—</td>
-      <td style="color:#d1d5db;text-align:center">—</td>
-    </tr>`).join('');
+    <div class="card bg-gui"><div class="card-label">${nuconta.caixGuiName}</div><div class="card-value c-gui">${R(nuconta.caixGui)}</div></div>
+    <div class="card bg-ste"><div class="card-label">${nuconta.caixSteName}</div><div class="card-value c-ste">${R(nuconta.caixSte)}</div></div>
+    <div class="card bg-amb"><div class="card-label">${nuconta.caixTurboName}</div><div class="card-value c-amb">${R(nuconta.caixTurbo)}</div></div>`;
 
-  // Comp
+  const movRow = x => {
+    const cls = x.v>=0 ? 'money-pos' : 'money-neg';
+    return `<tr><td>${x.d}</td><td class="money ${cls}" style="text-align:right">${R(x.v)}</td></tr>`;
+  };
+  document.getElementById('nuconta-body').innerHTML=
+    nuconta.movsCaixinha.length ? nuconta.movsCaixinha.map(movRow).join('')
+    : '<tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:16px">—</td></tr>';
+  document.getElementById('poupanca-body').innerHTML=
+    nuconta.movsPoupanca.length ? nuconta.movsPoupanca.map(movRow).join('')
+    : '<tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:16px">—</td></tr>';
+
+  // ── Comp ──
   compData=comp.items;
   document.getElementById('comp-total').textContent=R(comp.total);
   document.getElementById('comp-sub').textContent='Referente a NuBank + Contas';
@@ -485,18 +576,19 @@ function renderAll(saldo, nb, contas, comp, nuconta){
 async function init(){
   try {
     const resp=await fetch('./financas.xlsx');
-    if(!resp.ok) throw new Error(`HTTP ${resp.status} — arquivo não encontrado`);
+    if(!resp.ok) throw new Error(`HTTP ${resp.status} — financas.xlsx não encontrado`);
     const buf=await resp.arrayBuffer();
     const wb=XLSX.read(buf,{type:'array',cellDates:false});
     console.log('[Init] sheets:', Object.keys(wb.Sheets));
 
     const saldo   = parseSaldo(wb);
-    const nb      = parseNuBank(wb);
+    const nb      = parseCardEntries(wb,'NuBank','NuBank Total');
+    const itau    = parseCardEntries(wb,'Itaú','Itaú Total');
     const contas  = parseContas(wb);
     const comp    = parseComp(wb);
     const nuconta = parseNuConta(wb);
 
-    renderAll(saldo, nb, contas, comp, nuconta);
+    renderAll(saldo, nb, itau, contas, comp, nuconta);
     document.getElementById('loading').style.display='none';
   } catch(e){
     console.error('[Init] error:', e);
@@ -505,7 +597,7 @@ async function init(){
         <div style="font-size:32px;margin-bottom:12px">❌</div>
         <div style="font-weight:700;margin-bottom:8px;color:#dc2626">Erro ao carregar financas.xlsx</div>
         <div style="font-size:12px;color:#64748b;max-width:400px">${e.message}</div>
-        <div style="font-size:11px;color:#94a3b8;margin-top:8px">Veja o console (F12) para detalhes</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:8px">Abra o console (F12) para detalhes</div>
       </div>`;
   }
 }
