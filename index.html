@@ -473,13 +473,20 @@ function parseNuConta(wb){
     'Com turbo','Sem turbo','Caixinha Guilherme','Caixinha Stella','Caixinha Turbo','Para retirar mês que vem?']);
 
   for(const movDescCol of movDescCols){
-    const movValCol=movDescCol+2; // value is always 2 cols after description
-    const isCaixinha=(caixGuiCol>=0 && movDescCol < caixGuiCol); // left side = caixinha
+    // Value column varies per section:
+    //   Caixinha (col F): value at F+1 = G
+    //   Poupança (col L): value at L+2 = N (col M can be text)
+    // → scan offsets +1, +2, +3 and take first numeric found per row
+    const isCaixinha=(caixGuiCol>=0 && movDescCol < caixGuiCol);
     for(const row of data){
       const d=str(row[movDescCol]);
       if(!d||skipLabels.has(d)) continue;
-      const v=row[movValCol];
-      if(v==null||typeof v!=='number') continue;
+      let v=null;
+      for(let off=1; off<=3; off++){
+        const c=row[movDescCol+off];
+        if(typeof c==='number'){ v=c; break; }
+      }
+      if(v===null) continue;
       if(isCaixinha) movsCaixinha.push({d, v});
       else           movsPoupanca.push({d, v});
     }
