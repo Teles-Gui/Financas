@@ -2,613 +2,1065 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💸</text></svg>">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Finanças Steles 25/07</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<meta name="theme-color" content="#1f6958">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💸</text></svg>">
+<title>Finanças Steles</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;color:#1e293b;font-size:13px}
-.header{background:#1e293b;color:#fff;padding:14px 24px}
-.header-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center}
-.header h1{font-size:17px;font-weight:700}
-.header span{font-size:12px;color:#94a3b8;margin-left:auto}
-.tabs-wrap{background:#fff;border-bottom:2px solid #e2e8f0}
-.tabs{max-width:1100px;margin:0 auto;display:flex;padding:0;gap:2px;overflow-x:auto}
-.tab{padding:14px 18px;cursor:pointer;font-size:12px;font-weight:600;color:#64748b;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:.15s}
-.tab:hover{color:#3b82f6}.tab.active{color:#3b82f6;border-bottom-color:#3b82f6}
-.page{display:none;padding:24px;max-width:1100px;margin:0 auto}.page.active{display:block}
-.cards{display:grid;gap:14px;margin-bottom:20px}
-.cards-2{grid-template-columns:repeat(2,1fr)}.cards-3{grid-template-columns:repeat(3,1fr)}.cards-4{grid-template-columns:repeat(4,1fr)}
-@media(max-width:700px){.cards-4,.cards-3{grid-template-columns:repeat(2,1fr)}.cards-2{grid-template-columns:1fr}}
-.card{background:#fff;border-radius:10px;padding:16px 18px;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,.05)}
-.card-label{font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.card-value{font-size:22px;font-weight:800}
-.c-gui{color:#2563eb}.c-ste{color:#e11d48}.c-amb{color:#7c3aed}.c-pais{color:#475569}.c-grn{color:#16a34a}
-.bg-gui{background:#eff6ff;border-color:#bfdbfe}.bg-ste{background:#fff1f2;border-color:#fecdd3}
-.bg-amb{background:#f5f3ff;border-color:#ddd6fe}.bg-grn{background:#f0fdf4;border-color:#bbf7d0}
-.section-title{font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin:20px 0 10px}
-table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05);border:1px solid #e2e8f0}
-thead th{background:#1e293b;color:#fff;padding:9px 10px;text-align:left;font-size:11px;font-weight:600;white-space:nowrap}
-tbody tr:hover{background:#f8fafc}
-tbody td{padding:8px 10px;border-bottom:1px solid #f1f5f9;font-size:12px;vertical-align:middle}
-tbody tr:last-child td{border-bottom:none}
-.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;white-space:nowrap}
-.badge-gui{background:#dbeafe;color:#1d4ed8}.badge-ste{background:#ffe4e6;color:#be123c}
-.badge-amb{background:#ede9fe;color:#6d28d9}.badge-pais{background:#f3f4f6;color:#374151;border:1px solid #d1d5db}
-.badge-pont{background:#fef9c3;color:#854d0e}.badge-parc{background:#dbeafe;color:#1e40af}
-.badge-asin{background:#fce7f3;color:#9d174d}.badge-pgto{background:#fee2e2;color:#991b1b}
-.badge-cat{background:#f1f5f9;color:#475569;border:1px solid #e2e8f0}
-.money{font-weight:700;font-variant-numeric:tabular-nums}.money-neg{color:#dc2626}.money-pos{color:#16a34a}
-.parc-info{display:flex;align-items:center;gap:6px}
-.parc-bar{height:5px;background:#e2e8f0;border-radius:3px;width:50px;overflow:hidden}
-.parc-fill{height:100%;background:#3b82f6;border-radius:3px}
-.comp-box{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border-radius:12px;padding:24px;margin-bottom:20px;text-align:center}
-.comp-box .label{font-size:12px;opacity:.85;margin-bottom:6px}
-.comp-box .value{font-size:36px;font-weight:900}
-.comp-box .sub{font-size:12px;opacity:.75;margin-top:6px}
-.filter-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
-.filter-btn{padding:4px 12px;border-radius:99px;border:1px solid #e2e8f0;background:#fff;font-size:11px;font-weight:600;cursor:pointer;color:#64748b}
-.filter-btn.active{background:#3b82f6;color:#fff;border-color:#3b82f6}
-.search-input{padding:6px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:12px;width:200px;outline:none}
-.search-input:focus{border-color:#3b82f6}
-.saldo-section{background:#fff;border-radius:10px;padding:16px 18px;border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:16px}
-.saldo-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9}
-.saldo-row:last-child{border-bottom:none}
-.saldo-row .lbl{color:#475569;font-size:12px}
-.saldo-row .vals{display:flex;gap:32px}
-.saldo-row .val{font-size:12px;font-weight:600;min-width:90px;text-align:right}
-.saldo-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.saldo-hdr .cols{display:flex;gap:32px}
-.saldo-hdr .col-hdr{font-size:11px;font-weight:700;min-width:90px;text-align:right}
-.comp-row{cursor:default}
-.comp-row.expandable{cursor:pointer;transition:.15s}
-.comp-row.expandable:hover{background:#f5f3ff !important}
-.comp-row.expandable td:first-child::before{content:'▶ ';font-size:10px;color:#7c3aed}
-.comp-row.expandable.open td:first-child::before{content:'▼ '}
-.comp-sub-row{background:#faf5ff !important}
-.comp-sub-row td{font-size:11px;color:#374151;padding:6px 10px 6px 28px !important}
-.comp-sub-row:hover{background:#f3e8ff !important}
-.comp-total-row td{background:#f5f3ff;font-weight:700;font-size:13px}
-#loading{position:fixed;inset:0;background:rgba(241,245,249,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px}
-#loading .spinner{width:40px;height:40px;border:4px solid #e2e8f0;border-top-color:#3b82f6;border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-#loading p{font-size:14px;color:#475569;font-weight:600}
+:root{
+  --bg:#f4f1ea;--surface:#fffdf8;--surface-2:#f8f5ef;--ink:#1f2927;--muted:#6f7975;
+  --line:#dfded7;--green:#1f6958;--green-2:#3c8a72;--green-soft:#dcece5;
+  --navy:#253b52;--navy-soft:#dfe8f1;--orange:#c86532;--orange-soft:#f4dfd1;
+  --yellow:#d29c2b;--yellow-soft:#f4ead0;--red:#b84d49;--red-soft:#f3dedd;
+  --purple:#735c8f;--purple-soft:#e8e1ee;--white:#fff;--shadow:0 12px 36px rgba(30,42,39,.07);
+  --radius:22px;--radius-sm:14px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;background:
+  radial-gradient(circle at 10% -10%,rgba(60,138,114,.13),transparent 30%),
+  radial-gradient(circle at 100% 0%,rgba(200,101,50,.08),transparent 24%),var(--bg);
+  color:var(--ink);font-family:Inter,"Segoe UI",system-ui,-apple-system,sans-serif;font-size:13px}
+button,input{font:inherit}
+button{color:inherit}
+.shell{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh}
+.sidebar{position:sticky;top:0;height:100vh;padding:28px 18px;background:rgba(255,253,248,.88);
+  border-right:1px solid rgba(31,105,88,.13);backdrop-filter:blur(18px);z-index:20}
+.brand{display:flex;align-items:center;gap:12px;padding:0 8px 28px}
+.brand-mark{width:42px;height:42px;border-radius:14px;background:var(--green);display:grid;place-items:center;
+  color:#fff;font-size:18px;font-weight:900;box-shadow:0 9px 20px rgba(31,105,88,.24)}
+.brand strong{display:block;font-size:14px}.brand span{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+.nav{display:grid;gap:5px}
+.nav button{width:100%;display:flex;align-items:center;gap:11px;border:0;background:transparent;padding:11px 12px;
+  border-radius:12px;cursor:pointer;color:var(--muted);font-size:11px;font-weight:750;text-align:left;transition:.16s}
+.nav button:hover{background:var(--surface-2);color:var(--ink)}
+.nav button.active{background:var(--green-soft);color:var(--green)}
+.nav-icon{width:23px;height:23px;border-radius:8px;background:rgba(31,105,88,.08);display:grid;place-items:center;font-size:12px}
+.nav button.active .nav-icon{background:var(--green);color:#fff}
+.sidebar-note{position:absolute;left:18px;right:18px;bottom:22px;padding:14px;border-radius:15px;background:var(--navy);
+  color:rgba(255,255,255,.68);font-size:10px;line-height:1.55}
+.sidebar-note strong{display:block;color:#fff;font-size:11px;margin-bottom:4px}
+main{min-width:0;padding:32px 38px 56px}
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:28px;margin-bottom:24px}
+.eyebrow{color:var(--green);font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px}
+h1{font-size:37px;line-height:1.02;letter-spacing:-1.6px;margin:0}
+.subtitle{margin:11px 0 0;max-width:650px;color:var(--muted);line-height:1.6;font-size:12px}
+.top-actions{display:flex;gap:10px;align-items:center}
+.static-pill{padding:9px 12px;border:1px solid var(--line);border-radius:999px;background:rgba(255,253,248,.8);
+  color:var(--muted);font-size:10px;white-space:nowrap}
+.page{display:none;animation:fade .18s ease}.page.active{display:block}
+@keyframes fade{from{opacity:.2;transform:translateY(4px)}to{opacity:1;transform:none}}
+.page-head{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:18px}
+.page-head h2{font-size:23px;letter-spacing:-.7px;margin:0}.page-head p{font-size:11px;color:var(--muted);margin:5px 0 0}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:var(--surface-2);
+  color:var(--muted);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;white-space:nowrap}
+.notice{display:flex;justify-content:space-between;gap:18px;align-items:center;background:var(--yellow-soft);
+  border:1px solid rgba(210,156,43,.25);padding:13px 16px;border-radius:16px;margin-bottom:18px;color:#665019;font-size:11px}
+.notice strong{color:#43330f}
+.grid{display:grid;gap:18px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.grid.equal{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:rgba(255,253,248,.92);border:1px solid rgba(111,121,117,.18);border-radius:var(--radius);
+  padding:20px;box-shadow:var(--shadow);min-width:0}
+.card.compact{padding:16px}.card.dark{background:var(--navy);color:#fff;border-color:transparent}
+.card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:17px}
+.card-head h3,.card-head h2{font-size:14px;margin:0;letter-spacing:-.2px}.card-desc{color:var(--muted);font-size:10px;line-height:1.5;margin:4px 0 0}
+.card.dark .card-desc{color:rgba(255,255,255,.57)}
+.kpi{padding:18px 19px;position:relative;overflow:hidden}
+.kpi::after{content:"";position:absolute;right:-18px;top:-24px;width:74px;height:74px;border-radius:50%;background:rgba(31,105,88,.08)}
+.kpi .label{color:var(--muted);font-size:9px;font-weight:850;text-transform:uppercase;letter-spacing:.7px}
+.kpi .value{font-size:22px;font-weight:900;letter-spacing:-.7px;margin-top:7px;font-variant-numeric:tabular-nums}
+.kpi .delta{font-size:9px;color:var(--muted);margin-top:5px}
+.kpi.good{border-top:4px solid var(--green)}.kpi.blue{border-top:4px solid var(--navy)}
+.kpi.warn{border-top:4px solid var(--orange)}.kpi.purple{border-top:4px solid var(--purple)}
+.person-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.person-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.person-card.gui{border-top:5px solid var(--navy)}.person-card.ste{border-top:5px solid var(--orange)}
+.person-top{display:flex;justify-content:space-between;align-items:center;padding:18px 20px 15px;border-bottom:1px solid var(--line)}
+.person-name{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:900}
+.avatar{width:34px;height:34px;border-radius:12px;background:var(--navy-soft);color:var(--navy);display:grid;place-items:center;font-size:10px;font-weight:900}
+.avatar.ste{background:var(--orange-soft);color:var(--orange)}
+.person-balance{text-align:right}.person-balance span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;font-weight:800;letter-spacing:.6px}
+.person-balance strong{font-size:19px;color:var(--green)}
+.person-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line)}
+.person-kpi{background:var(--surface);padding:14px 15px}.person-kpi span{display:block;color:var(--muted);font-size:8px;text-transform:uppercase;font-weight:850;letter-spacing:.5px}
+.person-kpi strong{display:block;margin-top:5px;font-size:15px;font-variant-numeric:tabular-nums}
+.person-flow{padding:14px 20px 19px}
+.flow-row{display:grid;grid-template-columns:minmax(110px,1fr) minmax(90px,2fr) 92px;gap:10px;align-items:center;padding:6px 0}
+.flow-label{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flow-track{height:7px;border-radius:999px;background:#eceae4;overflow:hidden}.flow-fill{height:100%;border-radius:999px;background:var(--navy)}
+.person-card.ste .flow-fill{background:var(--orange)}.flow-value{text-align:right;font-size:10px;font-weight:800;font-variant-numeric:tabular-nums}
+.person-summary{margin-top:13px;padding-top:13px;border-top:1px solid var(--line);display:flex;justify-content:space-between;color:var(--muted);font-size:10px}
+.person-summary strong{color:var(--ink)}
+.house-details{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.house-details summary{list-style:none;cursor:pointer;padding:15px 18px;font-size:11px;font-weight:850;display:flex;justify-content:space-between;align-items:center}
+.house-details summary::-webkit-details-marker{display:none}.house-details summary::after{content:"＋";color:var(--green);font-size:18px}
+.house-details[open] summary::after{content:"−"}.house-body{padding:0 18px 18px;border-top:1px solid var(--line)}
+.card-bars{display:grid;gap:11px}.bar-row{display:grid;grid-template-columns:minmax(100px,150px) minmax(90px,1fr) 92px;gap:10px;align-items:center}
+.bar-label{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bar-track{height:9px;border-radius:999px;background:#ebe9e3;overflow:hidden}
+.bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--green-2))}
+.bar-value{text-align:right;font-size:10px;font-weight:800;font-variant-numeric:tabular-nums}
+.chart-card{min-height:330px}.chart-toolbar{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:7px}
+.segmented{display:flex;gap:4px;padding:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+.segmented button{border:0;background:transparent;border-radius:9px;padding:7px 10px;font-size:9px;font-weight:850;cursor:pointer;color:var(--muted)}
+.segmented button:hover{color:var(--green)}.segmented button.active{background:var(--green);color:#fff;box-shadow:0 4px 10px rgba(31,105,88,.18)}
+.chart-area{height:282px;margin-top:8px;position:relative}.chart-area svg{width:100%;height:100%;overflow:visible}
+.chart-empty{height:100%;display:grid;place-items:center;color:var(--muted);font-size:11px}
+.chart-foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:11px;border-top:1px solid var(--line);color:var(--muted);font-size:9px}
+.chart-foot strong{color:var(--ink)}
+.projection-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0 0}
+.proj-stat{padding:11px;border-radius:13px;background:var(--surface-2)}.proj-stat span{display:block;color:var(--muted);font-size:8px;text-transform:uppercase;font-weight:850;letter-spacing:.5px}
+.proj-stat strong{display:block;font-size:13px;margin-top:4px;font-variant-numeric:tabular-nums}
+.table-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.search{min-width:220px;flex:1;max-width:340px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:9px 11px;font-size:10px;outline:none}
+.search:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+.chips{display:flex;gap:5px;flex-wrap:wrap}.chip{border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:7px 10px;font-size:9px;font-weight:800;cursor:pointer}
+.chip:hover{border-color:var(--green);color:var(--green)}.chip.active{background:var(--green);border-color:var(--green);color:#fff}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+table{width:100%;border-collapse:collapse;min-width:770px}
+thead th{position:sticky;top:0;background:var(--navy);color:#fff;padding:10px 11px;text-align:left;font-size:9px;font-weight:750;white-space:nowrap;z-index:1}
+tbody td{padding:9px 11px;border-bottom:1px solid #eeece6;font-size:10px;vertical-align:middle}
+tbody tr:hover{background:#faf8f3}tbody tr:last-child td{border-bottom:0}.money{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;font-size:8px;font-weight:850;white-space:nowrap}
+.badge.gui{background:var(--navy-soft);color:var(--navy)}.badge.ste{background:var(--orange-soft);color:var(--orange)}
+.badge.both{background:var(--purple-soft);color:var(--purple)}.badge.parents{background:#edeae4;color:#5f625f}
+.badge.cat{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.badge.parc{background:var(--navy-soft);color:var(--navy)}.badge.sub{background:var(--purple-soft);color:var(--purple)}
+.progress{display:flex;align-items:center;gap:6px}.progress-track{width:48px;height:5px;border-radius:999px;background:#e8e5de;overflow:hidden}
+.progress-fill{height:100%;background:var(--green);border-radius:999px}.progress span{font-size:8px;color:var(--muted)}
+.comp-hero{background:linear-gradient(135deg,var(--navy),#354f6a 55%,var(--purple));color:#fff;border-radius:var(--radius);
+  padding:25px;box-shadow:0 18px 36px rgba(37,59,82,.2);display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:25px;margin-bottom:18px}
+.comp-person{text-align:center}.comp-person .avatar{margin:0 auto 8px;background:rgba(255,255,255,.13);color:#fff}.comp-person strong{display:block;font-size:14px}.comp-person span{font-size:9px;color:rgba(255,255,255,.62)}
+.comp-center{text-align:center}.comp-center .label{font-size:9px;color:rgba(255,255,255,.63);text-transform:uppercase;font-weight:800;letter-spacing:.7px}.comp-center .value{font-size:31px;font-weight:950;letter-spacing:-1px;margin:4px 0}.comp-arrow{height:2px;width:140px;background:rgba(255,255,255,.35);position:relative;margin:12px auto 0}.comp-arrow::after{content:"";position:absolute;right:-1px;top:-4px;border-left:8px solid rgba(255,255,255,.65);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.comp-row.expandable{cursor:pointer}.comp-row.expandable:hover{background:var(--purple-soft)}.comp-sub{background:#faf7fc}.comp-total td{font-weight:900;background:var(--purple-soft);color:var(--purple)}
+.check-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.check-item{display:flex;align-items:center;gap:11px;padding:15px;border:1px solid var(--line);border-radius:15px;background:var(--surface)}
+.check-icon{width:29px;height:29px;border-radius:10px;display:grid;place-items:center;background:var(--green-soft);color:var(--green);font-weight:900}.check-item.pending .check-icon{background:var(--yellow-soft);color:#856719}
+.check-item strong{display:block;font-size:11px}.check-item span{font-size:9px;color:var(--muted)}
+.movement-list{max-height:520px;overflow:auto}.movement-row{display:flex;justify-content:space-between;gap:15px;padding:10px 0;border-bottom:1px solid var(--line)}
+.movement-row:last-child{border-bottom:0}.movement-row strong{font-size:10px}.movement-row span{display:block;color:var(--muted);font-size:9px;margin-top:2px}.movement-value{font-weight:850;font-size:10px;white-space:nowrap}.positive{color:var(--green)}.negative{color:var(--red)}
+.section-gap{margin-top:18px}.only-desktop{display:block}
+@media(max-width:1100px){.shell{grid-template-columns:210px minmax(0,1fr)}main{padding:28px 25px}.grid.four{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:820px){
+  .shell{display:block}.sidebar{position:sticky;height:auto;padding:11px 12px;background:rgba(255,253,248,.96);border-right:0;border-bottom:1px solid var(--line)}
+  .brand{display:none}.nav{display:flex;overflow-x:auto;gap:4px}.nav button{width:auto;white-space:nowrap;padding:9px 10px}.nav-icon{display:none}.sidebar-note{display:none}
+  main{padding:22px 15px 44px}.topbar{display:block}.top-actions{margin-top:14px}.person-grid,.grid.two,.grid.equal,.grid.three{grid-template-columns:1fr}
+  .grid.four{grid-template-columns:repeat(2,minmax(0,1fr))}.check-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .comp-hero{grid-template-columns:1fr;padding:20px}.comp-arrow{transform:rotate(90deg);width:65px}.page-head{align-items:flex-start}
+}
+@media(max-width:520px){h1{font-size:30px}.grid.four,.projection-kpis,.check-grid{grid-template-columns:1fr 1fr}.flow-row{grid-template-columns:95px 1fr 78px}.bar-row{grid-template-columns:95px 1fr 80px}.static-pill{display:none}}
+
+
+/* --- Centro de controle e ajustes solicitados --- */
+.topbar h1{font-size:31px;line-height:1.08;letter-spacing:-1px}
+.dashboard-kpis{margin-bottom:18px}
+.clickable-card{cursor:pointer;transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease}
+.clickable-card:hover{transform:translateY(-2px);border-color:rgba(31,105,88,.42);box-shadow:0 16px 38px rgba(30,42,39,.11)}
+.click-hint{display:inline-flex;align-items:center;gap:5px;margin-top:7px;color:var(--green);font-size:9px;font-weight:800}
+.person-snapshot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.snapshot-card{padding:18px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+.snapshot-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}
+.snapshot-name{display:flex;align-items:center;gap:9px;font-weight:900}
+.snapshot-balance{text-align:right}.snapshot-balance span{display:block;color:var(--muted);font-size:8px;text-transform:uppercase;font-weight:850;letter-spacing:.6px}.snapshot-balance strong{font-size:18px;color:var(--green)}
+.snapshot-values{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.snapshot-stat{padding:10px;border-radius:12px;background:var(--surface-2)}.snapshot-stat span{display:block;color:var(--muted);font-size:8px;text-transform:uppercase;font-weight:800}.snapshot-stat strong{display:block;margin-top:4px;font-size:12px}
+.compare-list{display:grid;gap:14px}.compare-row{display:grid;grid-template-columns:92px minmax(0,1fr);gap:12px;align-items:start}.compare-name{font-size:10px;font-weight:850;padding-top:3px}.compare-bars{display:grid;gap:7px}.compare-line{display:grid;grid-template-columns:62px minmax(0,1fr) 92px;gap:8px;align-items:center}.compare-line span{font-size:9px;color:var(--muted)}.compare-track{height:9px;background:#ebe9e3;border-radius:999px;overflow:hidden}.compare-fill{height:100%;border-radius:999px}.compare-fill.income{background:var(--green)}.compare-fill.out{background:var(--orange)}.compare-fill.balance{background:var(--navy)}.compare-value{text-align:right;font-size:9px;font-weight:850}
+.donut-layout{display:grid;grid-template-columns:180px minmax(0,1fr);gap:20px;align-items:center;min-height:220px}.donut-wrap{position:relative;width:170px;height:170px;margin:auto}.donut-wrap svg{width:100%;height:100%;transform:rotate(-90deg)}.donut-center{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none}.donut-center span{font-size:8px;text-transform:uppercase;color:var(--muted);font-weight:850;letter-spacing:.6px}.donut-center strong{font-size:17px;margin-top:3px}.donut-legend{display:grid;gap:10px}.donut-item{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:8px;align-items:center}.donut-dot{width:9px;height:9px;border-radius:50%}.donut-item span{font-size:10px}.donut-item strong{font-size:10px}
+.summary-expand{border:0;margin:0;padding:0}.summary-expand>summary{list-style:none;cursor:pointer}.summary-expand>summary::-webkit-details-marker{display:none}.summary-expand>summary .flow-label::after{content:" ▸";color:var(--green);font-weight:900}.summary-expand[open]>summary .flow-label::after{content:" ▾"}
+.summary-children{margin:2px 0 8px 15px;padding-left:12px;border-left:2px solid var(--green-soft)}.summary-subrow{display:flex;justify-content:space-between;gap:12px;padding:5px 0;color:var(--muted);font-size:9px}.summary-subrow strong{color:var(--ink);font-size:9px}
+.weight-cell{min-width:170px}.weight-inline{display:grid;grid-template-columns:minmax(75px,1fr) 42px;gap:8px;align-items:center}.weight-inline .bar-track{height:7px}.weight-inline span{text-align:right;font-size:9px;font-weight:850;color:var(--muted)}
+.chart-area{position:relative}.projection-tooltip{position:absolute;z-index:12;display:none;max-width:310px;padding:12px 13px;background:rgba(37,59,82,.97);color:#fff;border-radius:12px;box-shadow:0 14px 30px rgba(20,32,44,.25);font-size:9px;line-height:1.45;pointer-events:none}.projection-tooltip strong{display:block;font-size:11px;margin-bottom:4px}.projection-tooltip ul{margin:7px 0 0;padding-left:16px}.projection-tooltip li{margin:3px 0}
+.waterfall{min-height:320px}.waterfall svg{width:100%;height:auto;display:block}.waterfall-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;color:var(--muted);font-size:9px}.waterfall-legend span{display:flex;align-items:center;gap:6px}.waterfall-key{width:9px;height:9px;border-radius:3px}
+.dashboard-check{display:grid;gap:10px}.dashboard-check-head{display:flex;justify-content:space-between;align-items:center}.dashboard-check-list{display:grid;gap:7px}.dashboard-check-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:10px}.dashboard-check-row:last-child{border-bottom:0}.status-ok{color:var(--green);font-weight:850}.status-pending{color:var(--orange);font-weight:850}
+.check-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:15px}.check-progress{font-size:11px;font-weight:850}.secondary-btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:7px 10px;cursor:pointer;font-size:9px;font-weight:800;color:var(--muted)}.secondary-btn:hover{border-color:var(--green);color:var(--green)}
+.check-item{cursor:pointer}.check-box{width:20px;height:20px;accent-color:var(--green);cursor:pointer}.check-item.done{opacity:.74}.check-item.done strong{text-decoration:line-through}.check-item label{display:flex;align-items:center;gap:11px;width:100%;cursor:pointer}
+.settled-value{text-decoration:line-through;text-decoration-thickness:2px;color:var(--red);font-weight:900}.settled-note{display:block;color:var(--red);font-size:8px;font-weight:850;margin-top:2px}
+.comp-toggle{cursor:pointer}.comp-toggle:hover{background:var(--purple-soft)}.comp-toggle td:first-child::before{content:"▶ ";font-size:9px;color:var(--purple)}.comp-toggle.open td:first-child::before{content:"▼ "}
+.comp-breakdown{display:grid;gap:10px}.comp-breakdown .proj-stat{display:flex;justify-content:space-between;align-items:center}
+.mini-line{min-height:230px}.mini-line svg{width:100%;height:auto;display:block}
+@media(max-width:900px){.donut-layout{grid-template-columns:1fr}.person-snapshot{grid-template-columns:1fr}}
+@media(max-width:620px){.snapshot-values{grid-template-columns:1fr 1fr 1fr}.compare-row{grid-template-columns:1fr}.donut-layout{grid-template-columns:1fr}.weight-cell{min-width:130px}}
+
+/* QA visual — roscas, gráficos pessoais, parcelas futuras e waterfall completo */
+.donut-layout{grid-template-columns:minmax(190px,220px) minmax(0,1fr);gap:24px;align-items:center;min-height:230px}
+.donut-wrap{width:190px;height:190px}
+.donut-center{padding:0 30px}
+.donut-center span{font-size:8px;line-height:1.2;letter-spacing:.7px}
+.donut-center strong{font-size:15px;line-height:1.15;white-space:nowrap}
+.donut-legend{gap:8px;align-content:center}
+.donut-item{grid-template-columns:11px minmax(0,1fr) auto;gap:9px;padding:8px 0;border-bottom:1px solid var(--line)}
+.donut-item:last-child{border-bottom:0}
+.donut-dot{width:10px;height:10px}
+.donut-copy{min-width:0;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.donut-copy span{font-size:10px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.donut-copy small{font-size:9px;color:var(--muted);white-space:nowrap}
+.donut-item>strong{font-size:10px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.dashboard-person-charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.person-bar-chart{border:1px solid var(--line);border-radius:16px;padding:14px;background:var(--surface-2)}
+.person-bar-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;font-size:11px;font-weight:850}
+.vertical-bars{height:178px;display:grid;grid-template-columns:repeat(3,1fr);align-items:end;gap:12px;padding:8px 4px 0;border-bottom:1px solid var(--line)}
+.vertical-bar-item{height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;min-width:0}
+.vertical-bar-value{font-size:8px;font-weight:850;margin-bottom:6px;white-space:nowrap}
+.vertical-bar-track{height:132px;width:min(44px,80%);display:flex;align-items:flex-end;background:#ebe9e3;border-radius:9px 9px 3px 3px;overflow:hidden}
+.vertical-bar-fill{width:100%;min-height:3px;border-radius:9px 9px 3px 3px}
+.vertical-bar-fill.income{background:var(--green)}
+.vertical-bar-fill.out{background:var(--orange)}
+.vertical-bar-fill.balance{background:var(--navy)}
+.vertical-bar-label{font-size:8px;color:var(--muted);margin-top:7px;text-align:center}
+.ending-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.ending-card{background:var(--surface);border:1px solid var(--line);border-radius:17px;padding:15px 16px;box-shadow:var(--shadow);min-width:0}
+.ending-card .month{font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:850;letter-spacing:.6px}
+.ending-card .amount{font-size:19px;font-weight:900;color:var(--green);margin:6px 0 5px}
+.ending-card .caption{font-size:9px;color:var(--muted);line-height:1.45}
+.ending-items{display:grid;gap:4px;margin-top:10px;padding-top:9px;border-top:1px solid var(--line)}
+.ending-item{display:flex;justify-content:space-between;gap:8px;font-size:8px;color:var(--muted)}
+.ending-item span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ending-item strong{color:var(--ink);white-space:nowrap}
+.dashboard-check-list{max-height:none;overflow:visible}
+.waterfall-scroll{overflow-x:auto;overscroll-behavior-inline:contain;padding-bottom:9px}
+.waterfall-scroll .waterfall-wide{min-width:max-content}
+.comp-summary-grid{grid-template-columns:repeat(4,minmax(0,1fr));display:grid;gap:12px}
+.comp-summary-grid .proj-stat{padding:13px 14px;border:1px solid var(--line);border-radius:13px;background:var(--surface-2)}
+@media(max-width:1100px){.donut-layout{grid-template-columns:1fr}.donut-wrap{width:180px;height:180px}.ending-grid{grid-template-columns:1fr}.comp-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.dashboard-person-charts{grid-template-columns:1fr}.donut-center strong{font-size:14px}.comp-summary-grid{grid-template-columns:1fr}}
+
+
+/* Ajustes finais — destaque equilibrado das sobras e expansão da projeção */
+.person-top{align-items:center}
+.person-balance{
+  min-width:162px;
+  padding:10px 13px;
+  border:1px solid rgba(31,105,88,.18);
+  border-radius:13px;
+  background:var(--green-soft);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  box-shadow:inset 3px 0 0 var(--green);
+}
+.person-balance span{
+  color:var(--green);
+  font-size:8px;
+  letter-spacing:.65px;
+}
+.person-balance strong{
+  margin-top:4px;
+  font-size:22px;
+  line-height:1;
+  letter-spacing:-.6px;
+}
+#house-kpis .kpi:nth-child(3){
+  background:linear-gradient(135deg,var(--green-soft),var(--surface));
+  border-color:rgba(31,105,88,.28);
+  border-top-color:var(--green);
+}
+#house-kpis .kpi:nth-child(3) .label,
+#house-kpis .kpi:nth-child(3) .value{color:var(--green)}
+
+#projection-chart{
+  width:100%;
+  height:330px;
+  min-height:330px;
+  margin-top:14px;
+}
+#projection-chart svg{
+  display:block;
+  width:100%;
+  height:100%;
+  min-height:0;
+}
+/* NuBank: tipografia ligeiramente maior, sem alterar a densidade do restante do painel */
+#page-nubank .ending-card .month{font-size:10px}
+#page-nubank .ending-card .caption{font-size:10px}
+#page-nubank .ending-item{font-size:9px}
+#page-nubank .card-head h3{font-size:15px}
+#page-nubank .card-desc{font-size:11px}
+#page-nubank thead th{font-size:10px}
+#page-nubank tbody td{font-size:11px}
+#page-nubank .badge{font-size:9px}
+@media(max-width:700px){
+  .person-top{align-items:center}
+  .person-balance{min-width:0;padding:10px 12px}
+  .person-balance strong{font-size:21px}
+  #projection-chart{height:300px;min-height:300px;overflow-x:auto;padding-bottom:6px}
+  #projection-chart svg{width:900px;min-width:900px;height:300px}
+}
 </style>
 </head>
 <body>
 
-<div id="loading"><div class="spinner"></div><p>Carregando dados do Excel…</p></div>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">F</div><div><strong>Finanças Steles</strong><span>Guilherme &amp; Stella</span></div></div>
+    <nav class="nav" aria-label="Abas do dashboard">
+      <button class="active" data-page="saldo"><span class="nav-icon">⌂</span>Resumo</button>
+      <button data-page="dashboard"><span class="nav-icon">⌁</span>Dashboard</button>
+      <button data-page="nubank"><span class="nav-icon">N</span>NuBank</button>
+      <button data-page="itau"><span class="nav-icon">I</span>Itaú</button>
+      <button data-page="contas"><span class="nav-icon">C</span>Contas fixas</button>
+      <button data-page="parcelas"><span class="nav-icon">↘</span>Parcelas</button>
+      <button data-page="nuconta"><span class="nav-icon">◆</span>NuConta</button>
+      <button data-page="comp"><span class="nav-icon">⇄</span>Compensações</button>
+      <button data-page="check"><span class="nav-icon">✓</span>Checklist</button>
+    </nav>
+    <div class="sidebar-note"><strong>Dados ao vivo</strong>Lê o arquivo financas.xlsx desta mesma pasta a cada carregamento da página.</div>
+  </aside>
 
-<div class="header">
-  <div class="header-inner">
-    <h1>💰 Finanças Steles</h1>
-    <span id="header-info"></span>
-  </div>
-</div>
-<div class="tabs-wrap">
-  <div class="tabs">
-    <div class="tab active" onclick="showTab('saldo',this)">📊 Saldo</div>
-    <div class="tab" onclick="showTab('nubank',this)">💜 NuBank</div>
-    <div class="tab" onclick="showTab('itau',this)">🟠 Itaú</div>
-    <div class="tab" onclick="showTab('contas',this)">🏠 Contas Fixas</div>
-    <div class="tab" onclick="showTab('comp',this)">⚖️ Compensações</div>
-  </div>
+  <main>
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">Centro de controle financeiro</div>
+        <h1 id="main-title">Finanças Steles</h1>
+        <p class="subtitle">Entradas, saídas, sobra do mês, cartões, contas, compromissos futuros, NuConta e fechamento entre Guilherme e Stella.</p>
+      </div>
+      <div class="top-actions"><span id="base-date" class="static-pill">Carregando financas.xlsx…</span></div>
+    </header>
+
+    <section id="page-dashboard" class="page">
+      <div class="page-head"><div><h2>Dashboard</h2><p>Uma leitura rápida de tudo que exige atenção no mês.</p></div><span class="tag">Centro de controle</span></div>
+      <div id="dashboard-kpis" class="grid four dashboard-kpis"></div>
+      <div id="dashboard-people" class="person-snapshot"></div>
+
+      <div class="grid equal section-gap">
+        <article class="card">
+          <div class="card-head"><div><h3>Entradas, saídas e sobra</h3><p class="card-desc">Dois gráficos independentes para comparar a realidade de cada pessoa.</p></div><span class="tag">Fluxo mensal</span></div>
+          <div id="dashboard-person-bars" class="dashboard-person-charts"></div>
+        </article>
+        <article class="card">
+          <div class="card-head"><div><h3>Composição das saídas</h3><p class="card-desc">Contas, parcelas, assinaturas, gastos pontuais e NuConta.</p></div><span class="tag">Natureza do gasto</span></div>
+          <div id="dashboard-outflow-donut"></div>
+        </article>
+      </div>
+
+      <div class="grid equal section-gap">
+        <article class="card">
+          <div class="card-head"><div><h3>Projeção de parcelas</h3><p class="card-desc">Carga parcelada total nos próximos seis meses.</p></div><button class="secondary-btn" data-go="parcelas">Abrir projeção completa</button></div>
+          <div id="dashboard-projection" class="mini-line"></div>
+        </article>
+        <article class="card">
+          <div class="card-head"><div><h3>Checklist do fechamento</h3><p class="card-desc">Situação atual dos pagamentos.</p></div><button class="secondary-btn" data-go="check">Abrir checklist</button></div>
+          <div id="dashboard-checklist" class="dashboard-check"></div>
+        </article>
+      </div>
+
+      <article class="card section-gap">
+        <div class="card-head"><div><h3>Waterfall da NuConta</h3><p class="card-desc">Como as últimas movimentações levaram a caixinha geral ao saldo atual.</p></div><button class="secondary-btn" data-go="nuconta">Ver histórico</button></div>
+        <div id="dashboard-waterfall" class="waterfall"></div>
+      </article>
+    </section>
+
+    <section id="page-saldo" class="page active">
+      <div class="page-head"><div><h2>Resumo individual</h2><p>Guilherme e Stella são a leitura principal; o consolidado permanece visível logo abaixo.</p></div><span class="tag">Visão por pessoa</span></div>
+      <div id="person-panels" class="person-grid"></div>
+      <div id="house-kpis" class="grid four section-gap"></div>
+    </section>
+
+    <section id="page-nubank" class="page">
+      <div class="page-head"><div><h2>NuBank</h2><p>Composição da fatura, responsáveis, categorias e lançamentos.</p></div><span class="tag">Cartão principal</span></div>
+      <div id="nb-kpis" class="grid four"></div>
+      <div id="nb-ending-cards" class="ending-grid section-gap"></div>
+      <div class="grid equal section-gap">
+        <article class="card"><div class="card-head"><div><h3>Gastos por categoria</h3><p class="card-desc">Agrupamento dinâmico conforme a coluna Categoria.</p></div><span id="nb-cat-count" class="tag"></span></div><div id="nb-category-bars" class="card-bars"></div></article>
+        <article class="card"><div class="card-head"><div><h3>Distribuição por responsável</h3><p class="card-desc">Participação de Guilherme, Stella e Pais na fatura.</p></div><span class="tag">Rosca</span></div><div id="nb-owner-donut"></div></article>
+      </div>
+      <article class="card section-gap">
+        <div class="card-head"><div><h3>Lançamentos NuBank</h3><p class="card-desc">Modo vazio é tratado como Pontual.</p></div><span id="nb-row-count" class="tag"></span></div>
+        <div class="table-controls"><input id="nb-search" class="search" placeholder="Buscar descrição ou categoria…"><div id="nb-filters" class="chips">
+          <button class="chip active" data-filter="todos">Todos</button><button class="chip" data-filter="Parcelado">Parcelado</button>
+          <button class="chip" data-filter="Pontual">Pontual</button><button class="chip" data-filter="Assinatura">Assinatura</button><button class="chip" data-filter="Pagamento">Pagamento</button>
+        </div></div>
+        <div class="table-wrap"><table><thead><tr><th>Descrição</th><th>Responsável</th><th>Modo</th><th>Categoria</th><th class="money">Valor total</th><th class="money">Parcela</th><th>Progresso</th></tr></thead><tbody id="nb-table"></tbody></table></div>
+      </article>
+    </section>
+
+    <section id="page-itau" class="page">
+      <div class="page-head"><div><h2>Itaú</h2><p>Resumo e lançamentos do cartão Itaú.</p></div><span class="tag">Cartão secundário</span></div>
+      <div id="it-kpis" class="grid four"></div>
+      <div id="it-ending-cards" class="ending-grid section-gap"></div>
+      <div class="grid equal section-gap">
+        <article class="card"><div class="card-head"><div><h3>Gastos por categoria</h3><p class="card-desc">A visualização se adapta automaticamente às categorias.</p></div></div><div id="it-category-bars" class="card-bars"></div></article>
+        <article class="card"><div class="card-head"><div><h3>Distribuição por responsável</h3><p class="card-desc">Participação no total da fatura.</p></div><span class="tag">Rosca</span></div><div id="it-owner-donut"></div></article>
+      </div>
+      <article class="card section-gap"><div class="card-head"><div><h3>Lançamentos Itaú</h3><p class="card-desc">Modo vazio é tratado como Pontual.</p></div><span id="it-row-count" class="tag"></span></div>
+        <div class="table-wrap"><table><thead><tr><th>Descrição</th><th>Responsável</th><th>Modo</th><th>Categoria</th><th class="money">Valor total</th><th class="money">Parcela</th><th>Progresso</th></tr></thead><tbody id="it-table"></tbody></table></div>
+      </article>
+    </section>
+
+    <section id="page-contas" class="page">
+      <div class="page-head"><div><h2>Contas fixas</h2><p>Custos recorrentes da casa, com o peso incorporado diretamente ao detalhamento.</p></div><span class="tag">Moradia</span></div>
+      <div id="contas-kpis" class="grid three"></div>
+      <article class="card section-gap"><div class="card-head"><div><h3>Detalhamento das contas</h3><p class="card-desc">A coluna Peso substitui Responsável e mostra a relevância de cada conta no total.</p></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Descrição</th><th>Peso</th><th class="money">Valor total</th><th class="money">Por pessoa</th></tr></thead><tbody id="contas-table"></tbody></table></div>
+      </article>
+    </section>
+
+    <section id="page-parcelas" class="page">
+      <div class="page-head"><div><h2>Projeção de parcelas</h2><p>Baseada prioritariamente no mês da coluna Última Parcela.</p></div><span class="tag">NuBank + Itaú</span></div>
+      <article class="card chart-card">
+        <div class="chart-toolbar"><div><h3 style="margin:0;font-size:15px">Carga mensal parcelada</h3><p class="card-desc">Alterne entre o total e a parcela atribuída a cada responsável.</p></div>
+          <div id="projection-switch" class="segmented">
+            <button class="active" data-mode="total">Total</button><button data-mode="guilherme">Guilherme</button><button data-mode="stella">Stella</button><button data-mode="pais">Pais</button>
+          </div>
+        </div>
+        <div id="projection-chart" class="chart-area"><div id="projection-tooltip" class="projection-tooltip"></div></div>
+        <div id="projection-kpis" class="projection-kpis"></div>
+        <div class="chart-foot"><span>A fatura atual é agosto/2026.</span><span>Passe o mouse sobre os pontos para ver quais itens terminam em cada mês.</span></div>
+      </article>
+      <article class="card section-gap">
+        <div class="card-head"><div><h3>Compromissos parcelados</h3><p class="card-desc">A tabela acompanha a mesma seleção do gráfico.</p></div><span id="parcel-row-count" class="tag"></span></div>
+        <div class="table-wrap"><table><thead><tr><th>Origem</th><th>Descrição</th><th>Responsável</th><th>Categoria</th><th class="money">Parcela mensal</th><th>Parcelas</th><th>Última parcela</th></tr></thead><tbody id="parcel-table"></tbody></table></div>
+      </article>
+    </section>
+
+    <section id="page-nuconta" class="page">
+      <div class="page-head"><div><h2>NuConta e poupança</h2><p>Caixinha geral, movimentações e valores separados para usos específicos.</p></div><span class="tag">Histórico</span></div>
+      <div id="nu-kpis" class="grid two"></div>
+      <article class="card section-gap">
+        <div class="card-head"><div><h3>Waterfall completo da NuConta</h3><p class="card-desc">Todas as movimentações, do saldo inicial ao saldo atual. Arraste horizontalmente para navegar.</p></div><span class="tag">Histórico completo</span></div>
+        <div id="nu-waterfall" class="waterfall waterfall-scroll"></div>
+      </article>
+      <div class="grid equal section-gap">
+        <article class="card"><div class="card-head"><div><h3>Movimentações da caixinha</h3><p class="card-desc">Histórico preservado do arquivo atual.</p></div></div><div id="nu-movements" class="movement-list"></div></article>
+        <article class="card"><div class="card-head"><div><h3>Poupança Guilherme</h3><p class="card-desc">Valores separados para usos específicos.</p></div></div><div id="nu-reserved" class="movement-list"></div></article>
+      </div>
+    </section>
+
+    <section id="page-comp" class="page">
+      <div class="page-head"><div><h2>Compensações</h2><p>Detalhamento do que Stella precisa transferir a Guilherme.</p></div><span class="tag">Fechamento</span></div>
+      <div class="comp-hero">
+        <div class="comp-person"><div class="avatar ste">S</div><strong>Stella</strong><span>origem da transferência</span></div>
+        <div class="comp-center"><div class="label">Transferência para Guilherme</div><div id="comp-total" class="value"></div><div class="comp-arrow"></div></div>
+        <div class="comp-person"><div class="avatar">GT</div><strong>Guilherme</strong><span>recebe o acerto</span></div>
+      </div>
+      <article class="card">
+        <div class="card-head"><div><h3>Resumo do fechamento</h3><p class="card-desc">Cartões e contas que formam a transferência.</p></div></div>
+        <div id="comp-summary" class="comp-breakdown comp-summary-grid"></div>
+      </article>
+      <article class="card section-gap"><div class="card-head"><div><h3>Detalhamento</h3><p class="card-desc">Cartão NuBank e Contas podem ser expandidos.</p></div></div>
+        <div class="table-wrap"><table><thead><tr><th>Descrição</th><th class="money">Stella paga</th><th class="money">Guilherme paga</th></tr></thead><tbody id="comp-table"></tbody></table></div>
+      </article>
+    </section>
+
+    <section id="page-check" class="page">
+      <div class="page-head"><div><h2>Checklist de pagamento</h2><p>Marque e desmarque as contas; o estado fica salvo neste navegador.</p></div><span class="tag">Interativo</span></div>
+      <article class="card">
+        <div class="check-toolbar"><div id="check-progress" class="check-progress"></div><button id="check-reset" class="secondary-btn" type="button">Restaurar dados iniciais</button></div>
+        <div id="check-grid" class="check-grid"></div>
+      </article>
+    </section>
+  </main>
 </div>
 
-<div id="tab-saldo" class="page active">
-  <div class="cards cards-2" id="saldo-sal-cards"></div>
-  <div class="cards cards-2" id="saldo-sobra-cards"></div>
-  <div class="saldo-section">
-    <div class="saldo-hdr">
-      <div style="font-size:12px;font-weight:700;color:#1e293b;text-transform:uppercase;letter-spacing:.5px">Detalhamento</div>
-      <div class="cols"><div class="col-hdr c-gui">Guilherme</div><div class="col-hdr c-ste">Stella</div></div>
-    </div>
-    <div id="saldo-rows"></div>
-  </div>
-</div>
-
-<div id="tab-nubank" class="page">
-  <div class="cards cards-4" id="nb-cards"></div>
-  <div class="filter-row">
-    <input class="search-input" id="nb-search" placeholder="🔍 Buscar…" oninput="renderNubank()">
-    <button class="filter-btn active" onclick="setFilter('nb',this,'todos')">Todos</button>
-    <button class="filter-btn" onclick="setFilter('nb',this,'Parcelado')">Parcelado</button>
-    <button class="filter-btn" onclick="setFilter('nb',this,'Pontual')">Pontual</button>
-    <button class="filter-btn" onclick="setFilter('nb',this,'Assinatura')">Assinatura</button>
-    <button class="filter-btn" onclick="setFilter('nb',this,'Pagamento')">Pagamento</button>
-  </div>
-  <table><thead><tr><th>Descrição</th><th>Responsável</th><th>Modo</th><th>Categoria</th><th>Valor Total</th><th>Parcela</th><th>Progresso</th></tr></thead>
-  <tbody id="nb-body"></tbody></table>
-</div>
-
-<div id="tab-itau" class="page">
-  <div class="cards cards-4" id="it-cards"></div>
-  <table><thead><tr><th>Descrição</th><th>Responsável</th><th>Modo</th><th>Categoria</th><th>Valor Total</th><th>Parcela</th><th>Progresso</th></tr></thead>
-  <tbody id="it-body"></tbody></table>
-</div>
-
-<div id="tab-contas" class="page">
-  <div class="cards cards-3" id="contas-cards"></div>
-  <table><thead><tr><th>Descrição</th><th>Responsável</th><th>Valor Total</th><th>Por Pessoa</th></tr></thead>
-  <tbody id="contas-body"></tbody></table>
-</div>
-
-<div id="tab-nuconta" class="page">
-  <div class="cards cards-3" id="nuconta-cards"></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:16px">
-    <div>
-      <div class="section-title">Movimentações Caixinha</div>
-      <table><thead><tr><th>Descrição</th><th style="text-align:right">Valor</th></tr></thead>
-      <tbody id="nuconta-body"></tbody></table>
-    </div>
-    <div>
-      <div class="section-title">Poupança / NuConta</div>
-      <table><thead><tr><th>Descrição</th><th style="text-align:right">Valor</th></tr></thead>
-      <tbody id="poupanca-body"></tbody></table>
-    </div>
-  </div>
-</div>
-
-<div id="tab-comp" class="page">
-  <div class="comp-box">
-    <div class="label">💸 Stella deve transferir para Guilherme</div>
-    <div class="value" id="comp-total">—</div>
-    <div class="sub" id="comp-sub"></div>
-  </div>
-  <div class="section-title">Detalhamento <span style="font-size:10px;font-weight:400;color:#94a3b8">— clique em Cartão NuBank para ver os lançamentos</span></div>
-  <table>
-    <thead><tr><th>Descrição</th><th style="text-align:right">Stella paga</th><th style="text-align:right">Guilherme paga</th></tr></thead>
-    <tbody id="comp-body"></tbody>
-  </table>
-</div>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-// ── Helpers ──────────────────────────────────────────────────────────────────
-const R = n => {
-  const v = typeof n==='number' ? n : parseFloat(n);
-  return isNaN(v) ? 'R$ 0,00' : v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-};
-const num = v => { const n=parseFloat(v); return isNaN(n)?0:n; };
-const str = v => (v==null ? '' : String(v)).trim();
+let DATA=null;
 
-function showTab(t,el){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+t).classList.add('active');
-  el.classList.add('active');
-}
-function respBadge(r1,r2,r3){
-  const hasPais=!!r3;
-  let m='';
-  if(r1&&r2)  m='<span class="badge badge-amb">Ambos</span>';
-  else if(r1) m='<span class="badge badge-gui">Guilherme</span>';
-  else if(r2) m='<span class="badge badge-ste">Stella</span>';
-  if(hasPais) m+='<span class="badge badge-pais" style="margin-left:3px">+Pais</span>';
-  return m;
-}
-function modoBadge(m){
-  const map={Parcelado:'parc',Pontual:'pont',Assinatura:'asin',Pagamento:'pgto'};
-  return `<span class="badge badge-${map[m]||'cat'}">${m||'—'}</span>`;
-}
-function parcBar(paga,n){
-  if(!n||n<=1) return '—';
-  const pct=Math.min(100,Math.round((num(paga)||0)/n*100));
-  return `<div class="parc-info"><div class="parc-bar"><div class="parc-fill" style="width:${pct}%"></div></div><span style="font-size:11px;color:#64748b">${num(paga)||0}/${n}</span></div>`;
-}
-function entryRows(entries){
-  return entries.map(x=>`<tr>
-    <td style="font-weight:600">${x.d}</td>
-    <td>${respBadge(x.r1,x.r2,x.r3)}</td>
-    <td>${modoBadge(x.m)}</td>
-    <td><span class="badge badge-cat">${x.cat||'—'}</span></td>
-    <td class="money">${R(Math.abs(x.vt||0))}</td>
-    <td class="money">${R(Math.abs(x.vp||0))}</td>
-    <td>${parcBar(x.paga,x.n)}</td>
-  </tr>`).join('');
-}
+let REF_DATE=null;
+const BRL=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n)||0);
+const NUM=v=>Number.isFinite(Number(v))?Number(v):0;
+const TXT=v=>v==null?'':String(v).trim();
+const norm=s=>TXT(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const sum=(arr,fn=x=>x)=>arr.reduce((a,x)=>a+NUM(fn(x)),0);
+const ALL_ENTRIES=()=>[...DATA.nb.entries.map(x=>({...x,origem:'NuBank'})),...DATA.itau.entries.map(x=>({...x,origem:'Itaú'}))];
 
-let nbData=[], itData=[], stellaNbItems=[], compData=[], nbFilter='todos';
-let nbExpanded=false;
-
-function setFilter(tab,btn,f){
-  if(tab==='nb') nbFilter=f;
-  btn.closest('.filter-row').querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderNubank();
+function openPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===`page-${name}`));
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===name));
+  if(name==='parcelas') requestAnimationFrame(renderProjection);
+  window.scrollTo({top:0,behavior:'smooth'});
 }
-function renderNubank(){
-  const q=(document.getElementById('nb-search').value||'').toLowerCase();
-  const rows=nbData.filter(x=>{
-    if(nbFilter!=='todos'&&x.m!==nbFilter) return false;
-    if(q&&!x.d.toLowerCase().includes(q)) return false;
-    return true;
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>openPage(b.dataset.page)));
+document.addEventListener('click',e=>{
+  const target=e.target.closest('[data-go]');
+  if(target) openPage(target.dataset.go);
+});
+
+function ownerBadge(x){
+  const owners=[];
+  if(norm(x.r1)==='guilherme') owners.push('<span class="badge gui">Guilherme</span>');
+  if(norm(x.r2)==='stella') owners.push('<span class="badge ste">Stella</span>');
+  if(TXT(x.r3)) owners.push('<span class="badge parents">Pais</span>');
+  if(norm(x.r1)==='guilherme'&&norm(x.r2)==='stella'){
+    return '<span class="badge both">Ambos</span>'+(TXT(x.r3)?' <span class="badge parents">+ Pais</span>':'');
+  }
+  return owners.join(' ')||'<span class="badge cat">Não definido</span>';
+}
+function normalizedMode(m){return TXT(m)||'Pontual'}
+function modeBadge(m){
+  const label=normalizedMode(m),k=norm(label);
+  const cls=k.includes('parcel')?'parc':k.includes('assin')?'sub':k.includes('pagamento')?'pay':'cat';
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+function paidCount(raw,n){
+  if(raw==null||raw==='') return null;
+  const value=Number(raw);
+  return Number.isFinite(value)?Math.max(0,Math.min(n,Math.round(value))):null;
+}
+function progressHtml(x){
+  const n=Math.max(1,Math.round(NUM(x.n))),p=paidCount(x.paga,n);
+  if(n<=1) return '<span style="color:var(--muted)">—</span>';
+  const shown=p==null?0:p,pct=Math.min(100,shown/n*100);
+  return `<div class="progress"><div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div><span>${p==null?'?':shown}/${n}</span></div>`;
+}
+function categoryData(entries,valueKey='vp'){
+  const map=new Map();
+  entries.forEach(x=>{
+    const label=TXT(x.cat)||'Sem categoria',key=norm(label)||'sem categoria';
+    const old=map.get(key)||{label,value:0};old.value+=NUM(x[valueKey]);map.set(key,old);
   });
-  document.getElementById('nb-body').innerHTML=rows.length ? entryRows(rows)
-    : '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:32px">Nenhum resultado</td></tr>';
+  return [...map.values()].sort((a,b)=>b.value-a.value);
 }
-
+function ownerValues(totals){
+  return [
+    {label:'Guilherme',value:NUM(totals.gui),color:'#253b52'},
+    {label:'Stella',value:NUM(totals.ste),color:'#c86532'},
+    {label:'Pais',value:NUM(totals.pais),color:'#735c8f'}
+  ].filter(x=>Math.abs(x.value)>.005);
+}
+function renderBars(id,items,limit=12){
+  const el=document.getElementById(id),rows=items.slice(0,limit),max=Math.max(1,...rows.map(x=>Math.abs(x.value)));
+  el.innerHTML=rows.length?rows.map(x=>`<div class="bar-row"><div class="bar-label" title="${x.label}">${x.label}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.abs(x.value)/max*100}%"></div></div><div class="bar-value">${BRL(x.value)}</div></div>`).join(''):'<div class="chart-empty">Sem dados disponíveis</div>';
+}
+function renderDonut(id,items,centerLabel='Total'){
+  const el=document.getElementById(id),clean=items.filter(x=>Math.abs(NUM(x.value))>.005),total=sum(clean,x=>Math.abs(x.value));
+  if(!el) return;
+  if(!clean.length||total<=0){el.innerHTML='<div class="chart-empty">Sem dados disponíveis</div>';return}
+  const radius=65,circ=2*Math.PI*radius,colors=['#253b52','#c86532','#735c8f','#1f6958','#d29c2b','#b84d49'];
+  let offset=0;
+  const arcs=clean.map((x,i)=>{
+    const length=Math.abs(x.value)/total*circ,color=x.color||colors[i%colors.length];
+    const arc=`<circle cx="95" cy="95" r="${radius}" fill="none" stroke="${color}" stroke-width="22" stroke-dasharray="${length} ${circ-length}" stroke-dashoffset="${-offset}" stroke-linecap="butt"><title>${x.label}: ${BRL(x.value)} (${(Math.abs(x.value)/total*100).toFixed(1).replace('.',',')}%)</title></circle>`;
+    offset+=length;return arc;
+  }).join('');
+  const legend=clean.map((x,i)=>{
+    const pct=Math.abs(x.value)/total*100,color=x.color||colors[i%colors.length];
+    return `<div class="donut-item"><span class="donut-dot" style="background:${color}"></span><div class="donut-copy"><span title="${x.label}">${x.label}</span><small>${pct.toFixed(1).replace('.',',')}%</small></div><strong>${BRL(x.value)}</strong></div>`;
+  }).join('');
+  el.innerHTML=`<div class="donut-layout"><div class="donut-wrap"><svg viewBox="0 0 190 190" role="img" aria-label="${centerLabel} por categoria"><circle cx="95" cy="95" r="${radius}" fill="none" stroke="#ebe9e3" stroke-width="22"/>${arcs}</svg><div class="donut-center"><span>${centerLabel}</span><strong>${BRL(total)}</strong></div></div><div class="donut-legend">${legend}</div></div>`;
+}
+function kpiCard(label,value,sub,cls='good',go=''){
+  return `<article class="card kpi ${cls}${go?' clickable-card':''}" ${go?`data-go="${go}" role="button" tabindex="0"`:''}><div class="label">${label}</div><div class="value">${BRL(value)}</div><div class="delta">${sub||''}</div>${go?'<span class="click-hint">Abrir detalhes →</span>':''}</article>`;
+}
+function entryRow(x){
+  return `<tr><td><strong>${x.d}</strong></td><td>${ownerBadge(x)}</td><td>${modeBadge(x.m)}</td><td><span class="badge cat">${TXT(x.cat)||'Sem categoria'}</span></td><td class="money">${BRL(Math.abs(x.vt))}</td><td class="money">${BRL(x.vp)}</td><td>${progressHtml(x)}</td></tr>`;
+}
+function renderCardKpis(prefix,card){
+  document.getElementById(`${prefix}-kpis`).innerHTML=
+    kpiCard('Total da fatura',card.totals.total,'Valor total informado','good')+
+    kpiCard('Guilherme',card.totals.gui,'Valor atribuído','blue')+
+    kpiCard('Stella',card.totals.ste,'Valor atribuído','warn')+
+    kpiCard('Pais',card.totals.pais,'Valor atribuído','purple');
+}
+function personAccountShare(account,person){
+  if(person==='guilherme'&&norm(account.r1)==='guilherme') return NUM(account.pr);
+  if(person==='stella'&&norm(account.r2)==='stella') return NUM(account.pr);
+  return 0;
+}
+function flowRow(label,value,max){
+  const isCredit=value<0;
+  return `<div class="flow-row"><div class="flow-label">${label}</div><div class="flow-track"><div class="flow-fill" style="width:${Math.abs(value)/max*100}%"></div></div><div class="flow-value">${isCredit?'+ ':'− '}${BRL(Math.abs(value))}</div></div>`;
+}
+function accountDetails(person,totalValue,max){
+  const children=DATA.contas.map(x=>({label:x.d,value:personAccountShare(x,person)})).filter(x=>Math.abs(x.value)>.005);
+  return `<details class="summary-expand"><summary>${flowRow('Contas fixas',totalValue,max)}</summary><div class="summary-children">${children.map(x=>`<div class="summary-subrow"><span>${x.label}</span><strong>− ${BRL(x.value)}</strong></div>`).join('')}</div></details>`;
+}
+function renderSummary(){
+  const s=DATA.saldo;
+  const people=[
+    {key:'guilherme',name:'Guilherme',salary:s.salGui,balance:s.sobraGui,cls:'gui',avatar:'GT',
+      fixed:s.contasGui,items:[['Cartão Itaú',DATA.itau.totals.gui],['Cartão NuBank',s.nbGui],['NuConta',s.nucontaGui],['Poupança / reembolso',-s.poupancaGui],['Compensações',s.compGui]]},
+    {key:'stella',name:'Stella',salary:s.salSte,balance:s.sobraSte,cls:'ste',avatar:'S',
+      fixed:s.contasSte,items:[['Cartão Itaú',DATA.itau.totals.ste],['Cartão NuBank',s.nbSte],['NuConta',s.nucontaSte],['Poupança / reembolso',-s.poupancaSte],['Compensações',s.compSte]]}
+  ];
+  document.getElementById('person-panels').innerHTML=people.map(p=>{
+    const out=p.salary-p.balance,allValues=[p.fixed,...p.items.map(i=>i[1])],max=Math.max(1,...allValues.map(Math.abs));
+    const first=p.items.slice(0,2).map(i=>flowRow(i[0],i[1],max)).join('');
+    const after=p.items.slice(2).map(i=>flowRow(i[0],i[1],max)).join('');
+    return `<article class="person-card ${p.cls}">
+      <div class="person-top"><div class="person-name"><span class="avatar ${p.cls==='ste'?'ste':''}">${p.avatar}</span>${p.name}</div>
+        <div class="person-balance"><span>Sobra do mês</span><strong>${BRL(p.balance)}</strong></div></div>
+      <div class="person-kpis"><div class="person-kpi"><span>Entrada</span><strong>${BRL(p.salary)}</strong></div>
+        <div class="person-kpi"><span>Saídas líquidas</span><strong>${BRL(out)}</strong></div>
+        <div class="person-kpi"><span>Sobra da renda</span><strong>${p.salary?((p.balance/p.salary)*100).toFixed(1).replace('.',','):'0,0'}%</strong></div></div>
+      <div class="person-flow">${first}${accountDetails(p.key,p.fixed,max)}${after}
+        <div class="person-summary"><span>Total que sai <strong>${BRL(out)}</strong></span></div>
+      </div></article>`;
+  }).join('');
+  const income=s.salGui+s.salSte,balance=s.sobraGui+s.sobraSte,out=income-balance;
+  document.getElementById('house-kpis').innerHTML=
+    kpiCard('Renda conjunta',income,'Visão agregada da casa','good')+
+    kpiCard('Saídas líquidas',out,`${(out/income*100).toFixed(1).replace('.',',')}% da renda conjunta`,'warn')+
+    kpiCard('Sobra conjunta',balance,`${(balance/income*100).toFixed(1).replace('.',',')}% da renda conjunta`,'blue')+
+    kpiCard('Transferência Stella',DATA.comp.total,'Clique para abrir Compensações','purple','comp');
+}
+function renderSnapshot(){
+  const s=DATA.saldo,people=[
+    {name:'Guilherme',avatar:'GT',cls:'',salary:s.salGui,balance:s.sobraGui},
+    {name:'Stella',avatar:'S',cls:'ste',salary:s.salSte,balance:s.sobraSte}
+  ];
+  document.getElementById('dashboard-people').innerHTML=people.map(p=>{
+    const out=p.salary-p.balance;
+    return `<article class="snapshot-card"><div class="snapshot-head"><div class="snapshot-name"><span class="avatar ${p.cls}">${p.avatar}</span>${p.name}</div><div class="snapshot-balance"><span>Sobra</span><strong>${BRL(p.balance)}</strong></div></div><div class="snapshot-values"><div class="snapshot-stat"><span>Entrada</span><strong>${BRL(p.salary)}</strong></div><div class="snapshot-stat"><span>Saídas</span><strong>${BRL(out)}</strong></div><div class="snapshot-stat"><span>Disponível</span><strong>${(p.balance/p.salary*100).toFixed(1).replace('.',',')}%</strong></div></div></article>`;
+  }).join('');
+}
+function renderPersonComparison(){
+  const s=DATA.saldo,rows=[
+    {name:'Guilherme',avatar:'GT',cls:'',income:s.salGui,out:s.salGui-s.sobraGui,balance:s.sobraGui},
+    {name:'Stella',avatar:'S',cls:'ste',income:s.salSte,out:s.salSte-s.sobraSte,balance:s.sobraSte}
+  ];
+  document.getElementById('dashboard-person-bars').innerHTML=rows.map(x=>{
+    const max=Math.max(x.income,x.out,x.balance,1),bars=[
+      {label:'Entrada',value:x.income,cls:'income'},
+      {label:'Saídas',value:x.out,cls:'out'},
+      {label:'Sobra',value:x.balance,cls:'balance'}
+    ];
+    return `<div class="person-bar-chart"><div class="person-bar-title"><span style="display:flex;align-items:center;gap:8px"><span class="avatar ${x.cls}">${x.avatar}</span>${x.name}</span><span class="tag">Mensal</span></div><div class="vertical-bars">${bars.map(b=>`<div class="vertical-bar-item"><div class="vertical-bar-value">${BRL(b.value)}</div><div class="vertical-bar-track"><div class="vertical-bar-fill ${b.cls}" style="height:${b.value/max*100}%"></div></div><div class="vertical-bar-label">${b.label}</div></div>`).join('')}</div></div>`;
+  }).join('');
+}
+function dateMonth(value){
+  if(!value) return null;
+  const d=new Date(`${value}T00:00:00`);
+  return isNaN(d)?null:new Date(d.getFullYear(),d.getMonth(),1);
+}
+function addMonths(d,n){return new Date(d.getFullYear(),d.getMonth()+n,1)}
+function monthDiff(a,b){return (b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth())}
+function sameMonth(a,b){return a&&b&&a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()}
+function monthLabel(d,long=false){
+  return d.toLocaleDateString('pt-BR',long?{month:'long',year:'numeric'}:{month:'short',year:'2-digit'}).replace('.','');
+}
+function allInstallments(){
+  return ALL_ENTRIES().filter(x=>norm(normalizedMode(x.m)).includes('parcel')&&NUM(x.n)>1&&Math.abs(NUM(x.vp))>.005);
+}
+function ownerPart(x,mode){
+  if(mode==='total') return NUM(x.vp);
+  if(mode==='guilherme') return norm(x.r1)==='guilherme'?NUM(x.vr):0;
+  if(mode==='stella') return norm(x.r2)==='stella'?NUM(x.vr):0;
+  if(mode==='pais') return TXT(x.r3)?NUM(x.vr):0;
+  return 0;
+}
+function installmentWindow(x){
+  const first=dateMonth(x.first),last=dateMonth(x.last);
+  if(last&&last.getFullYear()>=2000){
+    return {start:first||REF_DATE,end:last,estimated:false};
+  }
+  const n=Math.max(1,Math.round(NUM(x.n))),p=paidCount(x.paga,n);
+  const remaining=Math.max(1,p==null?n:n-p);
+  return {start:first&&first>REF_DATE?first:REF_DATE,end:addMonths(REF_DATE,remaining-1),estimated:true};
+}
+function activeInMonth(x,d){
+  const w=installmentWindow(x);
+  return d>=w.start&&d<=w.end;
+}
+function projection(mode,count=12){
+  const entries=allInstallments(),months=[];
+  for(let i=0;i<count;i++){
+    const d=addMonths(REF_DATE,i),active=entries.filter(x=>activeInMonth(x,d)&&Math.abs(ownerPart(x,mode))>.005);
+    const ending=active.filter(x=>sameMonth(installmentWindow(x).end,d));
+    months.push({date:d,label:monthLabel(d),value:sum(active,x=>ownerPart(x,mode)),ending});
+  }
+  return months;
+}
+function renderLineChart(id,values,{tooltip=false,compact=false}={}){
+  const el=document.getElementById(id),max=Math.max(...values.map(x=>x.value),1),measuredWidth=id==='projection-chart'?(el.clientWidth||el.parentElement?.clientWidth||900):900,W=id==='projection-chart'?Math.max(900,Math.round(measuredWidth)):900,H=id==='projection-chart'?330:(compact?230:290),L=64,R=18,T=18,B=48,plotW=W-L-R,plotH=H-T-B;
+  if(max<=.01){el.innerHTML='<div class="chart-empty">Não há parcelas atribuídas a esta seleção.</div>';return}
+  const x=i=>L+(plotW/(Math.max(values.length-1,1)))*i,y=v=>T+plotH-(v/max)*plotH;
+  const ticks=4,grid=Array.from({length:ticks+1},(_,i)=>{const v=max*(ticks-i)/ticks,yy=T+plotH*i/ticks;return `<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="#dfded7" stroke-width="1"/><text x="${L-10}" y="${yy+3}" text-anchor="end" font-size="9" fill="#6f7975">${v>=1000?'R$ '+(v/1000).toFixed(1).replace('.',',')+'k':'R$ '+Math.round(v)}</text>`}).join('');
+  const pts=values.map((v,i)=>`${x(i)},${y(v.value)}`).join(' '),area=`${L},${T+plotH} ${pts} ${W-R},${T+plotH}`;
+  const labels=values.map((v,i)=>`<text x="${x(i)}" y="${H-16}" text-anchor="middle" font-size="9" fill="#6f7975">${v.label}</text>`).join('');
+  const dots=values.map((v,i)=>`<circle class="${tooltip?'proj-hit':''}" data-index="${i}" cx="${x(i)}" cy="${y(v.value)}" r="${tooltip?9:5}" fill="${tooltip?'transparent':'#fffdf8'}" stroke="${tooltip?'transparent':'#1f6958'}" stroke-width="3"></circle>${tooltip?`<circle cx="${x(i)}" cy="${y(v.value)}" r="4.5" fill="#fffdf8" stroke="#1f6958" stroke-width="3" pointer-events="none"></circle>`:''}`).join('');
+  const svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Projeção mensal de parcelas"><defs><linearGradient id="projArea-${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3c8a72" stop-opacity=".28"/><stop offset="100%" stop-color="#3c8a72" stop-opacity=".02"/></linearGradient></defs>${grid}<polygon points="${area}" fill="url(#projArea-${id})"/><polyline points="${pts}" fill="none" stroke="#1f6958" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>${dots}${labels}</svg>`;
+  if(id==='projection-chart'){
+    const tip=document.getElementById('projection-tooltip');
+    el.innerHTML=svg;el.appendChild(tip);
+    el.querySelectorAll('.proj-hit').forEach(dot=>{
+      dot.addEventListener('mouseenter',e=>{
+        const item=values[Number(dot.dataset.index)],list=item.ending;
+        tip.innerHTML=`<strong>${monthLabel(item.date,true)} · ${BRL(item.value)}</strong><span>${list.length?'Itens que terminam neste mês:':'Nenhum item termina neste mês.'}</span>${list.length?`<ul>${list.map(x=>`<li>${x.d}: ${BRL(ownerPart(x,projMode))}</li>`).join('')}</ul>`:''}`;
+        tip.style.display='block';
+      });
+      dot.addEventListener('mousemove',e=>{
+        const rect=el.getBoundingClientRect();
+        tip.style.left=`${Math.min(rect.width-320,Math.max(8,e.clientX-rect.left+12))}px`;
+        tip.style.top=`${Math.max(8,e.clientY-rect.top-18)}px`;
+      });
+      dot.addEventListener('mouseleave',()=>tip.style.display='none');
+    });
+  }else el.innerHTML=svg;
+}
+let projMode='total';
+function renderProjection(){
+  const values=projection(projMode,12);
+  renderLineChart('projection-chart',values,{tooltip:true});
+  const current=values[0].value,next=values[1].value,min=Math.min(...values.map(x=>x.value)),endingNow=sum(values[0].ending,x=>ownerPart(x,projMode));
+  document.getElementById('projection-kpis').innerHTML=[
+    ['Fatura atual',current],['Próxima fatura',next],['Termina na atual',endingNow],['Menor mês projetado',min]
+  ].map(x=>`<div class="proj-stat"><span>${x[0]}</span><strong>${BRL(x[1])}</strong></div>`).join('');
+  const rows=allInstallments().filter(x=>Math.abs(ownerPart(x,projMode))>.005);
+  document.getElementById('parcel-table').innerHTML=rows.map(x=>{
+    const n=Math.round(NUM(x.n)),w=installmentWindow(x),last=`${monthLabel(w.end,true)}${w.estimated?' (estimativa)':''}`;
+    return `<tr><td>${x.origem}</td><td><strong>${x.d}</strong></td><td>${ownerBadge(x)}</td><td><span class="badge cat">${x.cat||'Sem categoria'}</span></td><td class="money">${BRL(ownerPart(x,projMode))}</td><td>${n}</td><td>${last}</td></tr>`;
+  }).join('')||'<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--muted)">Nenhuma parcela para esta seleção</td></tr>';
+  document.getElementById('parcel-row-count').textContent=`${rows.length} ${rows.length===1?'compromisso':'compromissos'}`;
+}
+function renderDashboardProjection(){renderLineChart('dashboard-projection',projection('total',6),{compact:true})}
+function currentModeTotals(){
+  const entries=ALL_ENTRIES(),parcel=projection('total',1)[0].value;
+  const subscription=sum(entries.filter(x=>norm(normalizedMode(x.m)).includes('assin')),x=>x.vp);
+  const cardTotal=NUM(DATA.nb.totals.total)+NUM(DATA.itau.totals.total);
+  const other=cardTotal-parcel-subscription;
+  return {parcel,subscription,other};
+}
+function renderWaterfall(id,{full=false}={}){
+  const n=DATA.nuconta,final=NUM(n.caixGui)+NUM(n.caixSte),all=n.movsCaixinha;
+  let movements;
+  if(full){movements=all}
+  else{
+    let startIndex=all.findIndex(x=>norm(x.d).includes('julho - bonus'));
+    if(startIndex<0) startIndex=Math.max(0,all.length-9);
+    movements=all.slice(startIndex);
+  }
+  const movementSum=sum(movements,x=>x.v),initial=full?NUM(n.initialBalance):final-movementSum;
+  const points=[{label:'Saldo inicial',type:'total',value:initial,before:0,after:initial}];
+  let cumulative=initial;
+  movements.forEach(x=>{const before=cumulative;cumulative+=NUM(x.v);points.push({label:x.d,type:x.v>=0?'positive':'negative',value:x.v,before,after:cumulative})});
+  points.push({label:'Saldo atual',type:'total',value:final,before:0,after:final});
+  const W=full?Math.max(1500,points.length*104):980,H=full?370:330,L=58,R=24,T=28,B=88,plotW=W-L-R,plotH=H-T-B;
+  const allLevels=points.flatMap(p=>[p.before,p.after,0]),min=Math.min(...allLevels),max=Math.max(...allLevels),range=Math.max(1,max-min);
+  const y=v=>T+(max-v)/range*plotH,slot=plotW/points.length,barW=Math.max(22,Math.min(58,slot*.58));
+  let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Waterfall ${full?'completo':'recente'} das movimentações da NuConta" style="${full?`width:${W}px;height:${H}px`:'width:100%;height:auto'}"><line x1="${L}" y1="${y(0)}" x2="${W-R}" y2="${y(0)}" stroke="#cfcfc8" stroke-width="1"/>`;
+  points.forEach((p,i)=>{
+    const cx=L+slot*i+slot/2,x=cx-barW/2,from=p.type==='total'?0:p.before,to=p.after;
+    const top=Math.min(y(from),y(to)),height=Math.max(3,Math.abs(y(from)-y(to))),color=p.type==='total'?'#253b52':p.type==='positive'?'#1f6958':'#c86532';
+    if(i>0&&i<points.length-1){const prev=points[i-1],connectorY=y(prev.after);svg+=`<line x1="${L+slot*(i-1)+slot/2+barW/2}" y1="${connectorY}" x2="${x}" y2="${connectorY}" stroke="#aeb3b0" stroke-dasharray="4 4"/>`}
+    svg+=`<rect x="${x}" y="${top}" width="${barW}" height="${height}" rx="5" fill="${color}"><title>${p.label}: ${p.type==='total'?BRL(p.after):(p.value>=0?'+ ':'− ')+BRL(Math.abs(p.value))} · Saldo após: ${BRL(p.after)}</title></rect>`;
+    const short=p.label.length>18?p.label.slice(0,16)+'…':p.label;
+    svg+=`<text x="${cx}" y="${H-53}" text-anchor="middle" font-size="8" fill="#6f7975" transform="rotate(-30 ${cx} ${H-53})">${short}</text>`;
+    svg+=`<text x="${cx}" y="${Math.max(13,top-5)}" text-anchor="middle" font-size="8" font-weight="700" fill="${color}">${p.type==='total'?BRL(p.after).replace('R$ ','R$'):((p.value>=0?'+':'−')+Math.abs(p.value).toFixed(0))}</text>`;
+  });
+  svg+='</svg>';
+  const chart=full?`<div class="waterfall-wide" style="width:${W}px">${svg}</div>`:svg;
+  document.getElementById(id).innerHTML=chart+`<div class="waterfall-legend"><span><i class="waterfall-key" style="background:#253b52"></i>Saldo</span><span><i class="waterfall-key" style="background:#1f6958"></i>Entrada</span><span><i class="waterfall-key" style="background:#c86532"></i>Saída</span></div>`;
+}
+function getCheckState(){
+  const initial=Object.fromEntries(DATA.check.map((x,i)=>[i,norm(x.status)==='ok']));
+  try{
+    const saved=JSON.parse(localStorage.getItem('financas-steles-checklist-v2')||'null');
+    return saved&&typeof saved==='object'?{...initial,...saved}:initial;
+  }catch{return initial}
+}
+let CHECK_STATE={};
+function saveCheck(){try{localStorage.setItem('financas-steles-checklist-v2',JSON.stringify(CHECK_STATE))}catch(e){/* ambiente sem armazenamento persistente */}}
+function renderDashboardChecklist(){
+  const paid=DATA.check.filter((x,i)=>CHECK_STATE[i]).length,pending=DATA.check.length-paid;
+  document.getElementById('dashboard-checklist').innerHTML=`<div class="dashboard-check-head"><strong>${paid} de ${DATA.check.length} pagos</strong><span class="tag">${pending} pendentes</span></div><div class="dashboard-check-list">${DATA.check.map((x,i)=>{const ok=!!CHECK_STATE[i];return `<div class="dashboard-check-row"><span>${x.conta}</span><strong class="${ok?'status-ok':'status-pending'}">${ok?'Concluído':'Pendente'}</strong></div>`}).join('')}</div>`;
+}
+function renderCheck(){
+  const paid=DATA.check.filter((x,i)=>CHECK_STATE[i]).length;
+  document.getElementById('check-progress').textContent=`${paid} de ${DATA.check.length} pagamentos conferidos`;
+  document.getElementById('check-grid').innerHTML=DATA.check.map((x,i)=>{
+    const ok=!!CHECK_STATE[i];
+    return `<div class="check-item ${ok?'done':'pending'}"><label for="check-${i}"><input id="check-${i}" class="check-box" type="checkbox" data-check="${i}" ${ok?'checked':''}><span><strong>${x.conta}</strong><span>${ok?'Pagamento conferido':'Aguardando conferência'}${x.obs?' · '+x.obs:''}</span></span></label></div>`;
+  }).join('');
+  document.querySelectorAll('[data-check]').forEach(input=>input.addEventListener('change',()=>{
+    CHECK_STATE[input.dataset.check]=input.checked;saveCheck();renderCheck();renderDashboardChecklist();
+  }));
+}
+function renderDashboard(){
+  const s=DATA.saldo,income=s.salGui+s.salSte,balance=s.sobraGui+s.sobraSte,out=income-balance;
+  const fixed=sum(DATA.contas,x=>x.v),modes=currentModeTotals();
+  const products=sum(ALL_ENTRIES().filter(x=>norm(x.cat).includes('produto')),x=>x.vp);
+  document.getElementById('dashboard-kpis').innerHTML=
+    kpiCard('Entradas',income,'Salários considerados no mês','good')+
+    kpiCard('Saídas líquidas',out,'Após créditos e compensações','warn')+
+    kpiCard('Sobra do mês',balance,'Disponível para atravessar o mês','blue')+
+    kpiCard('Contas fixas',fixed,'Total recorrente da casa','purple','contas')+
+    kpiCard('Parcelas',modes.parcel,'Na fatura atual','warn','parcelas')+
+    kpiCard('Assinaturas',modes.subscription,'NuBank + Itaú','blue')+
+    kpiCard('Produtos',products,'Categoria Produtos','good')+
+    kpiCard('Transferência Stella',DATA.comp.total,'Fechamento com Guilherme','purple','comp');
+  renderSnapshot();renderPersonComparison();
+  const nuNet=s.nucontaGui+s.nucontaSte-s.poupancaGui-s.poupancaSte;
+  renderDonut('dashboard-outflow-donut',[
+    {label:'Contas fixas',value:fixed,color:'#253b52'},
+    {label:'Parcelas',value:modes.parcel,color:'#c86532'},
+    {label:'Assinaturas',value:modes.subscription,color:'#735c8f'},
+    {label:'Pontuais e outros',value:modes.other,color:'#d29c2b'},
+    {label:'NuConta líquida',value:nuNet,color:'#1f6958'}
+  ],'Total');
+  renderDashboardProjection();renderDashboardChecklist();renderWaterfall('dashboard-waterfall');
+}
+let nbFilter='todos';
+function renderNbTable(){
+  const q=norm(document.getElementById('nb-search').value),rows=DATA.nb.entries.filter(x=>(nbFilter==='todos'||norm(normalizedMode(x.m))===norm(nbFilter))&&norm(`${x.d} ${x.cat}`).includes(q));
+  document.getElementById('nb-table').innerHTML=rows.map(entryRow).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Nenhum resultado</td></tr>';
+  document.getElementById('nb-row-count').textContent=`${rows.length} ${rows.length===1?'lançamento':'lançamentos'}`;
+}
+function renderEndingCards(prefix,entries){
+  const base=REF_DATE,months=[0,1,2].map(offset=>addMonths(base,offset));
+  const cards=months.map(month=>{
+    const ending=entries.filter(x=>norm(normalizedMode(x.m))==='parcelado'&&sameMonth(installmentWindow(x).end,month));
+    const amount=sum(ending,x=>x.vp);
+    return `<article class="ending-card"><div class="month">${monthLabel(month,true)}</div><div class="amount">${BRL(amount)}</div><div class="caption">${ending.length?`${ending.length} ${ending.length===1?'parcela deixa':'parcelas deixam'} a fatura ao virar o mês`:'Nenhuma parcela termina neste mês'}</div>${ending.length?`<div class="ending-items">${ending.map(x=>`<div class="ending-item"><span title="${x.d}">${x.d}</span><strong>${BRL(x.vp)}</strong></div>`).join('')}</div>`:''}</article>`;
+  }).join('');
+  const el=document.getElementById(`${prefix}-ending-cards`);if(el) el.innerHTML=cards;
+}
+function renderCards(){
+  renderCardKpis('nb',DATA.nb);renderCardKpis('it',DATA.itau);
+  const nbCats=categoryData(DATA.nb.entries),itCats=categoryData(DATA.itau.entries);
+  renderBars('nb-category-bars',nbCats,14);renderDonut('nb-owner-donut',ownerValues(DATA.nb.totals),'Fatura');
+  renderBars('it-category-bars',itCats,14);renderDonut('it-owner-donut',ownerValues(DATA.itau.totals),'Fatura');
+  renderEndingCards('nb',DATA.nb.entries);renderEndingCards('it',DATA.itau.entries);
+  document.getElementById('nb-cat-count').textContent=`${nbCats.length} categorias`;
+  renderNbTable();
+  document.getElementById('it-table').innerHTML=DATA.itau.entries.map(entryRow).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:30px">Sem lançamentos</td></tr>';
+  document.getElementById('it-row-count').textContent=`${DATA.itau.entries.length} ${DATA.itau.entries.length===1?'lançamento':'lançamentos'}`;
+}
+function renderContas(){
+  const total=sum(DATA.contas,x=>x.v),gui=NUM(DATA.saldo.contasGui),ste=NUM(DATA.saldo.contasSte),max=Math.max(...DATA.contas.map(x=>x.v),1);
+  document.getElementById('contas-kpis').innerHTML=kpiCard('Total das contas',total,'Valor total mensal','good')+kpiCard('Guilherme',gui,'Valor atribuído','blue')+kpiCard('Stella',ste,'Valor atribuído','warn');
+  document.getElementById('contas-table').innerHTML=DATA.contas.map(x=>{
+    const pct=x.v/total*100;
+    return `<tr><td><strong>${x.d}</strong></td><td class="weight-cell"><div class="weight-inline"><div class="bar-track"><div class="bar-fill" style="width:${x.v/max*100}%"></div></div><span>${pct.toFixed(1).replace('.',',')}%</span></div></td><td class="money">${BRL(x.v)}</td><td class="money">${BRL(x.pr)}</td></tr>`;
+  }).join('');
+}
+function renderNuConta(){
+  const n=DATA.nuconta,general=NUM(n.caixGui)+NUM(n.caixSte);
+  document.getElementById('nu-kpis').innerHTML=
+    kpiCard('Caixinha Geral',general,'Soma das caixinhas de Guilherme e Stella','good')+
+    kpiCard('Poupança Guilherme',n.reservedTotal,'Valores separados para usos específicos','purple');
+  document.getElementById('nu-movements').innerHTML=n.movsCaixinha.map(x=>`<div class="movement-row"><div><strong>${x.d}</strong><span>Movimentação registrada</span></div><div class="movement-value ${x.v>=0?'positive':'negative'}">${x.v>=0?'+ ':'− '}${BRL(Math.abs(x.v))}</div></div>`).join('');
+  document.getElementById('nu-reserved').innerHTML=n.reserved.map(x=>`<div class="movement-row"><div><strong>${x.d}</strong><span>Finalidade informada</span></div><div class="movement-value">${BRL(x.v)}</div></div>`).join('');
+  renderWaterfall('nu-waterfall',{full:true});
+}
+const COMP_OPEN={nubank:false,contas:false};
 function renderComp(){
+  document.getElementById('comp-total').textContent=BRL(DATA.comp.total);
+  const principal=DATA.comp.items.filter(x=>!x.isTotal&&!x.isSub);
+  const itau=principal.find(x=>x.d==='Cartão Itaú')?.s||0,nb=principal.find(x=>x.d==='Cartão NuBank')?.s||0,contas=principal.find(x=>x.d==='Contas')?.s||0;
+  document.getElementById('comp-summary').innerHTML=[
+    ['Cartão Itaú',itau],['Cartão NuBank',nb],['Contas',contas],['Transferência total',DATA.comp.total]
+  ].map(x=>`<div class="proj-stat"><span>${x[0]}</span><strong>${BRL(x[1])}</strong></div>`).join('');
+  renderCompTable();
+}
+function renderCompTable(){
+  const principal=DATA.comp.items.filter(x=>!x.isTotal&&!x.isSub),accountSubs=DATA.comp.items.filter(x=>x.isSub);
   let html='';
-  const totalRow=compData.find(x=>x.isTotal);
-  const totalVal=totalRow?totalRow.s:0;
-  compData.filter(x=>!x.isTotal).forEach(x=>{
-    const isExpand=x.expandable;
-    html+=`<tr class="comp-row${isExpand?' expandable':''}${isExpand&&nbExpanded?' open':''}"
-      style="background:#fff" ${isExpand?'onclick="toggleNb()"':''}>
-      <td style="font-weight:${x.isSub?'400':'600'};color:${x.isSub?'#64748b':'#1e293b'};padding-left:${x.isSub?'28':'10'}px">${x.d}</td>
-      <td style="text-align:right" class="money c-ste">${x.s?R(x.s):'—'}</td>
-      <td style="text-align:right" class="money c-gui">${x.g?R(x.g):'—'}</td>
-    </tr>`;
-    if(isExpand&&nbExpanded){
-      stellaNbItems.forEach(nb=>{
-        html+=`<tr class="comp-sub-row">
-          <td>${nb.d} <span class="badge badge-cat">${nb.cat||'—'}</span></td>
-          <td style="text-align:right;font-weight:700;color:#be123c">${R(Math.abs(num(nb.vr)))}</td>
-          <td style="text-align:right;color:#94a3b8">—</td>
-        </tr>`;
+  principal.forEach(x=>{
+    const key=x.d==='Cartão NuBank'?'nubank':x.d==='Contas'?'contas':'',open=key?COMP_OPEN[key]:false;
+    html+=`<tr class="${key?'comp-toggle '+(open?'open':''):''}" ${key?`data-comp="${key}"`:''}><td><strong>${x.d}</strong></td><td class="money">${x.s?BRL(x.s):'—'}</td><td class="money">${x.g?BRL(x.g):'—'}</td></tr>`;
+    if(key==='nubank'&&open){
+      DATA.nb.entries.filter(n=>norm(n.r2)==='stella').forEach(n=>{
+        html+=`<tr class="comp-sub"><td style="padding-left:28px">${n.d} <span class="badge cat">${n.cat||'Sem categoria'}</span></td><td class="money">${BRL(Math.abs(n.vr))}</td><td class="money">—</td></tr>`;
+      });
+    }
+    if(key==='contas'&&open){
+      accountSubs.forEach(n=>{
+        const stella=n.d==='Vivo'?`<span class="settled-value">${BRL(n.s)}</span><span class="settled-note">valor já considerado</span>`:BRL(n.s);
+        html+=`<tr class="comp-sub"><td style="padding-left:28px">${n.d}</td><td class="money">${stella}</td><td class="money">—</td></tr>`;
       });
     }
   });
-  html+=`<tr class="comp-total-row">
-    <td style="color:#6d28d9">💸 Stella transfere para Guilherme</td>
-    <td style="text-align:right;color:#6d28d9">${R(totalVal)}</td>
-    <td style="text-align:right;color:#94a3b8">—</td>
-  </tr>`;
-  document.getElementById('comp-body').innerHTML=html;
-}
-function toggleNb(){nbExpanded=!nbExpanded;renderComp();}
-
-// ── Sheet reader ─────────────────────────────────────────────────────────────
-function sheetRows(wb, name){
-  // Exact match first
-  if(wb.Sheets[name])
-    return XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,defval:null,raw:true});
-  // Partial match (handles typos like "Compensasões")
-  const key=Object.keys(wb.Sheets).find(k=>
-    k.toLowerCase().includes(name.toLowerCase().slice(0,6)));
-  if(key){
-    console.log(`[sheet] fuzzy: "${name}" → "${key}"`);
-    return XLSX.utils.sheet_to_json(wb.Sheets[key],{header:1,defval:null,raw:true});
-  }
-  console.warn(`[sheet] NOT FOUND: "${name}" | available:`, Object.keys(wb.Sheets));
-  return [];
+  document.getElementById('comp-table').innerHTML=html;
+  document.querySelectorAll('[data-comp]').forEach(row=>row.addEventListener('click',()=>{const key=row.dataset.comp;COMP_OPEN[key]=!COMP_OPEN[key];renderCompTable()}));
 }
 
-// ── Parsers ───────────────────────────────────────────────────────────────────
-
-function parseSaldo(wb){
-  const data=sheetRows(wb,'Saldo');
-  const r={salGui:0,salSte:0,sobraGui:0,sobraSte:0,
-    nbGui:0,nbSte:0,contasGui:0,contasSte:0,nucontaSte:0,poupancaGui:0};
-  // Find columns by "Guilherme" / "Stella" header
-  const hdrRow=data.find(row=>row.some(c=>str(c).toLowerCase()==='guilherme'));
-  if(!hdrRow){ console.warn('[Saldo] header not found'); return r; }
-  const guiCol=hdrRow.findIndex(c=>str(c).toLowerCase()==='guilherme');
-  const steCol=hdrRow.findIndex(c=>str(c).toLowerCase()==='stella');
-  const lblCol=guiCol-1; // column just before Guilherme = labels
-  console.log('[Saldo] guiCol=',guiCol,'steCol=',steCol,'lblCol=',lblCol);
-  // Sobra: row immediately after header
-  const hi=data.indexOf(hdrRow);
-  if(hi>=0&&data[hi+1]){
-    r.sobraGui=num(data[hi+1][guiCol]);
-    r.sobraSte=num(data[hi+1][steCol]);
-  }
-  for(const row of data){
-    const lbl=str(row[lblCol]);
-    const g=num(row[guiCol]), s=num(row[steCol]);
-    if(lbl==='Salário')                       { r.salGui=g; r.salSte=s; }
-    if(lbl==='Cartão NuBank')                 { r.nbGui=g;  r.nbSte=s; }
-    if(lbl==='Contas')                        { r.contasGui=g; r.contasSte=s; }
-    if(lbl==='Dinheiro para NuConta')         { r.nucontaSte=s||g; }
-    if(lbl==='Dinheiro Guardado na poupança') { r.poupancaGui=g; }
-  }
-  console.log('[Saldo]', JSON.stringify(r));
-  return r;
+/* ===================== Leitura do financas.xlsx ===================== */
+function sheetRows(wb,name){
+  const ws=wb.Sheets[name];
+  if(!ws||!ws['!ref']) return [];
+  const range=XLSX.utils.decode_range(ws['!ref']);
+  range.s.r=0;range.s.c=0;
+  const normalizedRef=XLSX.utils.encode_range(range);
+  return XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:null,range:normalizedRef});
 }
-
-// Generic entry parser for NuBank / Itaú (same column structure)
-function parseCardEntries(wb, sheetName, totalLabel){
-  const data=sheetRows(wb, sheetName);
-  if(!data.length) return {totals:{total:0,gui:0,ste:0,pais:0}, entries:[]};
-
-  // ── Totals ──
-  let totals={total:0,gui:0,ste:0,pais:0};
-  for(let i=0;i<data.length;i++){
-    const row=data[i];
-    const tIdx=row.findIndex(c=>str(c)===totalLabel);
-    if(tIdx<0) continue;
-    const gIdx=row.findIndex(c=>str(c)==='Guilherme');
-    const sIdx=row.findIndex(c=>str(c)==='Stella');
-    const pIdx=row.findIndex(c=>str(c)==='Pais');
-    const vrow=data[i+1];
-    if(vrow){
-      if(tIdx>=0) totals.total=num(vrow[tIdx]);
-      if(gIdx>=0) totals.gui  =num(vrow[gIdx]);
-      if(sIdx>=0) totals.ste  =num(vrow[sIdx]);
-      if(pIdx>=0) totals.pais =num(vrow[pIdx]);
-    }
-    console.log(`[${sheetName}] totals:`, JSON.stringify(totals));
-    break;
-  }
-
-  // ── Entries: find "Descrição" header ──
-  const entries=[];
-  let descCol=-1, hfound=false;
-  for(const row of data){
-    if(!hfound){
-      const idx=row.findIndex(c=>str(c)==='Descrição');
-      if(idx<0) continue;
-      descCol=idx; hfound=true;
-      console.log(`[${sheetName}] descCol=`,descCol);
-      continue;
-    }
-    const d=str(row[descCol]);
-    if(!d) continue;
-    const div=num(row[descCol+4]);
-    if(div===0) continue;
-    const vt =num(row[descCol+5]);
-    let   m  =str(row[descCol+6]); if(!m||m==='À vista') m='Pontual';
-    const cat=str(row[descCol+7]);
-    const vp =num(row[descCol+8]);
-    const vr =num(row[descCol+9]);
-    const n  =num(row[descCol+10]);
-    const pagaRaw=row[descCol+13];
-    const paga=pagaRaw!=null ? num(pagaRaw) : null;
-    entries.push({
-      d,
-      r1:str(row[descCol+1]), r2:str(row[descCol+2]), r3:str(row[descCol+3]),
-      vt, m, cat, vp, vr, n, paga
-    });
-  }
-  console.log(`[${sheetName}] entries:`,entries.length,'| first:',JSON.stringify(entries[0]));
-  return {totals, entries};
+function cell(rows,r,c){
+  const row=rows[r];
+  if(!row) return null;
+  const v=row[c];
+  return v===undefined?null:v;
 }
-
-function parseContas(wb){
-  const data=sheetRows(wb,'Contas');
-  const entries=[];
-  let descCol=-1, hfound=false;
-  for(const row of data){
-    if(!hfound){
-      const idx=row.findIndex(c=>str(c)==='Descrição');
-      if(idx<0) continue;
-      descCol=idx; hfound=true; continue;
-    }
-    const d=str(row[descCol]);
-    if(!d) continue;
-    const div=num(row[descCol+4]);
-    if(div===0) continue;
-    entries.push({
-      d,
-      r1:str(row[descCol+1]), r2:str(row[descCol+2]), r3:str(row[descCol+3]),
-      v:num(row[descCol+5]),
-      pr:num(row[descCol+7])
-    });
-  }
-  console.log('[Contas] entries:',entries.length,'| first:',JSON.stringify(entries[0]));
-  return entries;
+function numOr0(v){const n=Number(v);return Number.isFinite(n)?n:0}
+function txtOr(v){return v===null||v===undefined?'':String(v).trim()}
+function toISODate(v){
+  if(!v) return null;
+  const d=v instanceof Date?v:new Date(v);
+  if(isNaN(d)) return null;
+  const y=d.getFullYear();
+  if(y<2000) return null;
+  const m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
 }
-
-function parseComp(wb){
-  const data=sheetRows(wb,'Compensas'); // fuzzy matches "Compensasões..."
-  // ── Discover columns ──
-  const hdrRow=data.find(row=>row.some(c=>str(c)==='Stella'));
-  if(!hdrRow){ console.warn('[Comp] header not found'); return {items:[],total:0}; }
-  const steCol=hdrRow.findIndex(c=>str(c)==='Stella');
-  const guiCol=hdrRow.findIndex(c=>str(c)==='Guilherme');
-  const lblCol=steCol-1; // label column is just before Stella
-  console.log('[Comp] lblCol=',lblCol,'steCol=',steCol,'guiCol=',guiCol);
-  const items=[];
-  for(const row of data){
-    const rawLbl=row[lblCol];
-    if(rawLbl==null) continue;
-    const lbl=str(rawLbl);
-    if(!lbl||lbl==='Stella'||lbl==='Guilherme') continue;
-    const s=num(row[steCol]);
-    const g=guiCol>=0 ? num(row[guiCol]) : 0;
-    if(lbl.toLowerCase().includes('stella tem que')){
-      items.push({isTotal:true, d:lbl, s, g:0}); continue;
-    }
-    const isSub=String(rawLbl).startsWith(' ');
-    items.push({
-      d: lbl, s, g, isSub,
-      expandable: lbl==='Cartão NuBank'
-    });
-  }
-  const totalRow=items.find(x=>x.isTotal);
-  console.log('[Comp] items:',items.length,'total:',totalRow?.s);
-  return {items, total:totalRow?.s||0};
-}
-
-function parseNuConta(wb){
-  const data=sheetRows(wb,'NuConta');
-  let caixGui=0, caixSte=0, caixTurbo=0;
-  let caixGuiName='Caixinha Guilherme', caixSteName='Caixinha Stella', caixTurboName='Caixinha Turbo';
-  let caixGuiCol=-1, caixSteCol=-1, caixTurboCol=-1;
-  const movsCaixinha=[], movsPoupanca=[];
-
-  // ── Find caixinha header row ──
-  for(const row of data){
-    const idx=row.findIndex(c=>str(c)==='Caixinha Guilherme'||str(c)==='Caixinha Stella');
-    if(idx<0) continue;
-    // Normalize: find both
-    const guiIdx=row.findIndex(c=>str(c)==='Caixinha Guilherme');
-    const steIdx=row.findIndex(c=>str(c)==='Caixinha Stella');
-    if(guiIdx>=0){
-      caixGuiCol=guiIdx; caixGuiName=str(row[guiIdx]);
-      caixSteCol=guiIdx+1; caixSteName=str(row[guiIdx+1])||'Caixinha Stella';
-      caixTurboCol=guiIdx+2; caixTurboName=str(row[guiIdx+2])||'Caixinha Turbo';
-    } else if(steIdx>=0){
-      caixSteCol=steIdx; caixSteName=str(row[steIdx]);
-      caixGuiCol=steIdx-1; caixGuiName='Caixinha Guilherme';
-      caixTurboCol=steIdx+1; caixTurboName=str(row[steIdx+1])||'Caixinha Turbo';
-    }
-    console.log('[NuConta] caixa cols: gui=',caixGuiCol,'ste=',caixSteCol,'turbo=',caixTurboCol);
-    break;
-  }
-
-  // ── Find "Sem turbo" row for balances ──
-  for(const row of data){
-    if(row.some(c=>str(c)==='Sem turbo')){
-      if(caixGuiCol>=0)   caixGui  =num(row[caixGuiCol]);
-      if(caixSteCol>=0)   caixSte  =num(row[caixSteCol]);
-      if(caixTurboCol>=0) caixTurbo=num(row[caixTurboCol]);
-      console.log('[NuConta] sem turbo balances: gui=',caixGui,'ste=',caixSte,'turbo=',caixTurbo);
-      break;
-    }
-  }
-
-  // ── Find movements: "Movimentação" label column ──
-  // Left-side caixinha movements (around col 5): look for 'Movimentação' in the LEFT block
-  // Right-side poupança movements: look for 'Movimentação' further right
-  // Strategy: find ALL 'Movimentação' labels and handle each block
-  const movDescCols=[];
-  for(const row of data){
-    row.forEach((c,i)=>{ if(str(c)==='Movimentação'&&!movDescCols.includes(i)) movDescCols.push(i); });
-  }
-  console.log('[NuConta] movDescCols:',movDescCols);
-
-  const skipLabels=new Set(['','Saldo inicial','Movimentação','Total','IPVAs + Licenciamento',
-    'Com turbo','Sem turbo','Caixinha Guilherme','Caixinha Stella','Caixinha Turbo','Para retirar mês que vem?']);
-
-  for(const movDescCol of movDescCols){
-    // Value column varies per section:
-    //   Caixinha (col F): value at F+1 = G
-    //   Poupança (col L): value at L+2 = N (col M can be text)
-    // → scan offsets +1, +2, +3 and take first numeric found per row
-    const isCaixinha=(caixGuiCol>=0 && movDescCol < caixGuiCol);
-    for(const row of data){
-      const d=str(row[movDescCol]);
-      if(!d||skipLabels.has(d)) continue;
-      let v=null;
-      for(let off=1; off<=3; off++){
-        const c=row[movDescCol+off];
-        if(typeof c==='number'){ v=c; break; }
-      }
-      if(v===null) continue;
-      if(isCaixinha) movsCaixinha.push({d, v});
-      else           movsPoupanca.push({d, v});
-    }
-  }
-  console.log('[NuConta] caixinha movs:',movsCaixinha.length,'poupanca movs:',movsPoupanca.length);
-
-  return {caixGui,caixSte,caixTurbo,caixGuiName,caixSteName,caixTurboName,movsCaixinha,movsPoupanca};
-}
-
-// ── Render ────────────────────────────────────────────────────────────────────
-function renderAll(saldo, nb, itau, contas, comp, nuconta){
-  document.getElementById('header-info').textContent=
-    `Atualizado em ${new Date().toLocaleDateString('pt-BR')}`;
-
-  // ── Saldo ──
-  document.getElementById('saldo-sal-cards').innerHTML=`
-    <div class="card bg-gui"><div class="card-label">Salário — Guilherme</div><div class="card-value c-gui">${R(saldo.salGui)}</div></div>
-    <div class="card bg-ste"><div class="card-label">Salário — Stella</div><div class="card-value c-ste">${R(saldo.salSte)}</div></div>`;
-  document.getElementById('saldo-sobra-cards').innerHTML=`
-    <div class="card bg-grn"><div class="card-label">Sobra — Guilherme</div><div class="card-value c-grn">${R(saldo.sobraGui)}</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">Após todos os gastos</div></div>
-    <div class="card bg-grn"><div class="card-label">Sobra — Stella</div><div class="card-value c-grn">${R(saldo.sobraSte)}</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">Após todos os gastos</div></div>`;
-  document.getElementById('saldo-rows').innerHTML=`
-    <div class="saldo-row"><span class="lbl">💰 Salário</span><div class="vals"><span class="val c-gui">${R(saldo.salGui)}</span><span class="val c-ste">${R(saldo.salSte)}</span></div></div>
-    <div class="saldo-row"><span class="lbl">💳 Cartão Itaú</span><div class="vals"><span class="val money-neg">— ${R(itau.totals.gui)}</span><span class="val money-neg">— ${R(itau.totals.ste)}</span></div></div>
-    <div class="saldo-row"><span class="lbl">💜 Cartão NuBank</span><div class="vals"><span class="val money-neg">— ${R(saldo.nbGui)}</span><span class="val money-neg">— ${R(saldo.nbSte)}</span></div></div>
-    <div class="saldo-row"><span class="lbl">🏠 Contas Fixas</span><div class="vals"><span class="val money-neg">— ${R(saldo.contasGui)}</span><span class="val money-neg">— ${R(saldo.contasSte)}</span></div></div>
-    <div class="saldo-row"><span class="lbl">🏦 NuConta/Poupança</span><div class="vals">
-      <span class="val ${saldo.poupancaGui>=0?'c-grn':'money-neg'}">${saldo.poupancaGui>=0?'+ ':'— '}${R(Math.abs(saldo.poupancaGui))}</span>
-      <span class="val money-neg">— ${R(saldo.nucontaSte)}</span>
-    </div></div>
-    <div class="saldo-row" style="padding-top:12px;margin-top:4px;border-top:2px solid #e2e8f0;border-bottom:none">
-      <span class="lbl" style="font-weight:700;font-size:13px">✅ Saldo Final</span>
-      <div class="vals"><span class="val c-grn" style="font-size:14px">${R(saldo.sobraGui)}</span><span class="val c-grn" style="font-size:14px">${R(saldo.sobraSte)}</span></div>
-    </div>`;
-
-  // ── NuBank ──
-  nbData=nb.entries;
-  stellaNbItems=nbData.filter(x=>x.r2==='Stella');
-  document.getElementById('nb-cards').innerHTML=`
-    <div class="card"><div class="card-label">Total NuBank</div><div class="card-value" style="font-size:18px">${R(nb.totals.total)}</div></div>
-    <div class="card bg-gui"><div class="card-label">Guilherme</div><div class="card-value c-gui" style="font-size:18px">${R(nb.totals.gui)}</div></div>
-    <div class="card bg-ste"><div class="card-label">Stella</div><div class="card-value c-ste" style="font-size:18px">${R(nb.totals.ste)}</div></div>
-    <div class="card"><div class="card-label">Pais</div><div class="card-value c-pais" style="font-size:18px">${R(nb.totals.pais)}</div></div>`;
-  renderNubank();
-
-  // ── Itaú ──
-  itData=itau.entries;
-  document.getElementById('it-cards').innerHTML=`
-    <div class="card"><div class="card-label">Total Itaú</div><div class="card-value" style="font-size:18px">${R(itau.totals.total)}</div></div>
-    <div class="card bg-gui"><div class="card-label">Guilherme</div><div class="card-value c-gui" style="font-size:18px">${R(itau.totals.gui)}</div></div>
-    <div class="card bg-ste"><div class="card-label">Stella</div><div class="card-value c-ste" style="font-size:18px">${R(itau.totals.ste)}</div></div>
-    <div class="card"><div class="card-label">Pais</div><div class="card-value c-pais" style="font-size:18px">${R(itau.totals.pais)}</div></div>`;
-  document.getElementById('it-body').innerHTML=itData.length ? entryRows(itData)
-    : '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:32px">Nenhum gasto no Itaú este mês</td></tr>';
-
-  // ── Contas ──
-  const totalContas=contas.reduce((a,x)=>a+num(x.v),0);
-  document.getElementById('contas-cards').innerHTML=`
-    <div class="card"><div class="card-label">Total Contas</div><div class="card-value" style="font-size:18px">${R(totalContas)}</div></div>
-    <div class="card bg-gui"><div class="card-label">Guilherme</div><div class="card-value c-gui" style="font-size:18px">${R(saldo.contasGui)}</div></div>
-    <div class="card bg-ste"><div class="card-label">Stella</div><div class="card-value c-ste" style="font-size:18px">${R(saldo.contasSte)}</div></div>`;
-  document.getElementById('contas-body').innerHTML=contas.map(x=>`<tr>
-    <td style="font-weight:600">${x.d}</td>
-    <td>${respBadge(x.r1,x.r2,x.r3)}</td>
-    <td class="money">${R(x.v)}</td>
-    <td class="money">${R(x.pr)}</td>
-  </tr>`).join('');
-
-  // ── NuConta ──
-  document.getElementById('nuconta-cards').innerHTML=`
-    <div class="card bg-gui"><div class="card-label">${nuconta.caixGuiName}</div><div class="card-value c-gui">${R(nuconta.caixGui)}</div></div>
-    <div class="card bg-ste"><div class="card-label">${nuconta.caixSteName}</div><div class="card-value c-ste">${R(nuconta.caixSte)}</div></div>
-    <div class="card bg-amb"><div class="card-label">${nuconta.caixTurboName}</div><div class="card-value c-amb">${R(nuconta.caixTurbo)}</div></div>`;
-
-  const movRow = x => {
-    const cls = x.v>=0 ? 'money-pos' : 'money-neg';
-    return `<tr><td>${x.d}</td><td class="money ${cls}" style="text-align:right">${R(x.v)}</td></tr>`;
+function parseSaldo(rows){
+  const g=r=>numOr0(cell(rows,r,2)),s=r=>numOr0(cell(rows,r,4));
+  return{
+    salGui:g(4),salSte:s(4),
+    sobraGui:g(2),sobraSte:s(2),
+    nbGui:g(8),nbSte:s(8),
+    contasGui:g(10),contasSte:s(10),
+    compGui:g(18),compSte:s(18),
+    nucontaGui:g(21),nucontaSte:s(21),
+    poupancaGui:g(22),poupancaSte:s(22)
   };
-  document.getElementById('nuconta-body').innerHTML=
-    nuconta.movsCaixinha.length ? nuconta.movsCaixinha.map(movRow).join('')
-    : '<tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:16px">—</td></tr>';
-  document.getElementById('poupanca-body').innerHTML=
-    nuconta.movsPoupanca.length ? nuconta.movsPoupanca.map(movRow).join('')
-    : '<tr><td colspan="2" style="text-align:center;color:#94a3b8;padding:16px">—</td></tr>';
-
-  // ── Comp ──
-  compData=comp.items;
-  document.getElementById('comp-total').textContent=R(comp.total);
-  document.getElementById('comp-sub').textContent='Referente a NuBank + Contas';
-  renderComp();
 }
+function parseCardSheet(rows,{headerRow,totalsRow}){
+  const totals={
+    total:numOr0(cell(rows,totalsRow,3)),
+    gui:numOr0(cell(rows,totalsRow,4)),
+    ste:numOr0(cell(rows,totalsRow,5)),
+    pais:numOr0(cell(rows,totalsRow,6))
+  };
+  const entries=[];
+  for(let r=headerRow+1;r<rows.length;r++){
+    const d=txtOr(cell(rows,r,3));
+    if(!d) continue;
+    const pagaRaw=cell(rows,r,16);
+    entries.push({
+      d,
+      r1:txtOr(cell(rows,r,4)),
+      r2:txtOr(cell(rows,r,5)),
+      r3:txtOr(cell(rows,r,6)),
+      vt:numOr0(cell(rows,r,8)),
+      m:txtOr(cell(rows,r,9)),
+      cat:txtOr(cell(rows,r,10)),
+      vp:numOr0(cell(rows,r,11)),
+      vr:numOr0(cell(rows,r,12)),
+      n:numOr0(cell(rows,r,13))||1,
+      first:toISODate(cell(rows,r,14)),
+      last:toISODate(cell(rows,r,15)),
+      paga:(pagaRaw===null||pagaRaw==='')?null:Number(pagaRaw)
+    });
+  }
+  return{totals,entries};
+}
+function parseContas(rows){
+  const headerRow=1,list=[];
+  for(let r=headerRow+1;r<rows.length;r++){
+    const d=txtOr(cell(rows,r,3));
+    if(!d) continue;
+    list.push({
+      d,
+      r1:txtOr(cell(rows,r,4)),
+      r2:txtOr(cell(rows,r,5)),
+      r3:txtOr(cell(rows,r,6)),
+      v:numOr0(cell(rows,r,8)),
+      pr:numOr0(cell(rows,r,10))
+    });
+  }
+  return list;
+}
+function parseComp(rows){
+  const items=[];
+  let total=0,mode=null;
+  for(let r=0;r<rows.length;r++){
+    const raw=cell(rows,r,1);
+    if(raw===null) continue;
+    const trimmed=String(raw).trim();
+    if(!trimmed) continue;
+    const sVal=numOr0(cell(rows,r,2)),gVal=numOr0(cell(rows,r,3));
+    const lower=trimmed.toLowerCase();
+    if(lower.includes('transferir')){
+      items.push({isTotal:true,d:trimmed,s:sVal,g:0});
+      total=sVal;mode=null;continue;
+    }
+    if(trimmed==='Cartão Itaú'||trimmed==='Cartão NuBank'){
+      items.push({d:trimmed,s:sVal,g:gVal,isSub:false,expandable:trimmed==='Cartão NuBank'});
+      mode=null;continue;
+    }
+    if(trimmed==='Contas'){
+      items.push({d:trimmed,s:sVal,g:0,isSub:false,expandable:true});
+      mode='contas';continue;
+    }
+    if(mode==='contas'){
+      items.push({d:trimmed,s:sVal,g:0,isSub:true,expandable:false});
+    }
+  }
+  return{items,total};
+}
+function parseNuConta(rows){
+  const caixGui=numOr0(cell(rows,10,6)),caixSte=numOr0(cell(rows,10,7));
+  const initialBalance=numOr0(cell(rows,11,6));
+  const reservedTotal=numOr0(cell(rows,2,13));
+  const reserved=[];
+  for(let r=4;r<=7;r++){
+    const label=txtOr(cell(rows,r,11));
+    if(!label||label.toLowerCase().includes('movimenta')) continue;
+    reserved.push({d:label,v:numOr0(cell(rows,r,13))});
+  }
+  const movsCaixinha=[];
+  for(let r=14;r<rows.length;r++){
+    const label=txtOr(cell(rows,r,5));
+    if(!label) continue;
+    movsCaixinha.push({d:label,v:numOr0(cell(rows,r,6))});
+  }
+  return{caixGui,caixSte,initialBalance,movsCaixinha,reserved,reservedTotal};
+}
+function parseCheck(rows){
+  const list=[];
+  for(let r=1;r<rows.length;r++){
+    const conta=txtOr(cell(rows,r,1));
+    if(!conta) continue;
+    list.push({conta,status:txtOr(cell(rows,r,2)),obs:txtOr(cell(rows,r,3))});
+  }
+  return list;
+}
+function buildDataFromWorkbook(wb){
+  const saldo=parseSaldo(sheetRows(wb,'Saldo'));
+  const comp=parseComp(sheetRows(wb,'Compensasões e Transferências'));
+  const itau=parseCardSheet(sheetRows(wb,'Itaú'),{headerRow:3,totalsRow:1});
+  const nb=parseCardSheet(sheetRows(wb,'NuBank'),{headerRow:4,totalsRow:1});
+  const contas=parseContas(sheetRows(wb,'Contas'));
+  const nuconta=parseNuConta(sheetRows(wb,'NuConta e Poupança'));
+  const check=parseCheck(sheetRows(wb,'Checklist de pagamento'));
 
-// ── Init ──────────────────────────────────────────────────────────────────────
-async function init(){
-  try {
-    const resp=await fetch('./financas.xlsx?v=' + Date.now());
-    if(!resp.ok) throw new Error(`HTTP ${resp.status} — financas.xlsx não encontrado`);
-    const buf=await resp.arrayBuffer();
-    const wb=XLSX.read(buf,{type:'array',cellDates:false});
-    console.log('[Init] sheets:', Object.keys(wb.Sheets));
+  const now=new Date();
+  const invoiceDate=new Date(now.getFullYear(),now.getMonth()+1,1);
+  const updated=now.toLocaleDateString('pt-BR');
+  const invoiceMonth=`${invoiceDate.getFullYear()}-${String(invoiceDate.getMonth()+1).padStart(2,'0')}-01`;
 
-    const saldo   = parseSaldo(wb);
-    const nb      = parseCardEntries(wb,'NuBank','NuBank Total');
-    const itau    = parseCardEntries(wb,'Itaú','Itaú Total');
-    const contas  = parseContas(wb);
-    const comp    = parseComp(wb);
-    const nuconta = parseNuConta(wb);
-
-    renderAll(saldo, nb, itau, contas, comp, nuconta);
-    document.getElementById('loading').style.display='none';
-  } catch(e){
-    console.error('[Init] error:', e);
-    document.getElementById('loading').innerHTML=`
-      <div style="text-align:center;padding:40px">
-        <div style="font-size:32px;margin-bottom:12px">❌</div>
-        <div style="font-weight:700;margin-bottom:8px;color:#dc2626">Erro ao carregar financas.xlsx</div>
-        <div style="font-size:12px;color:#64748b;max-width:400px">${e.message}</div>
-        <div style="font-size:11px;color:#94a3b8;margin-top:8px">Abra o console (F12) para detalhes</div>
-      </div>`;
+  return{meta:{updated,invoiceMonth},saldo,nb,itau,contas,comp,nuconta,check};
+}
+async function loadData(){
+  try{
+    const res=await fetch(`./financas.xlsx?v=${Date.now()}`);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const buf=await res.arrayBuffer();
+    const wb=XLSX.read(buf,{type:'array',cellDates:true});
+    DATA=buildDataFromWorkbook(wb);
+    REF_DATE=new Date(`${DATA.meta.invoiceMonth}T00:00:00`);
+    CHECK_STATE=getCheckState();
+    init();
+  }catch(err){
+    console.error('Falha ao carregar financas.xlsx',err);
+    const el=document.getElementById('base-date');
+    if(el) el.textContent='Erro ao carregar financas.xlsx';
+    document.querySelector('main').insertAdjacentHTML('afterbegin',
+      `<div class="notice"><span><strong>Não foi possível carregar financas.xlsx.</strong> Verifique se o arquivo está na mesma pasta do index.html e recarregue a página.</span></div>`);
   }
 }
-init();
+/* =================================================================== */
+function init(){
+  document.getElementById('main-title').textContent=`Finanças Steles - ${DATA.meta.updated}`;
+  document.title=`Finanças Steles - ${DATA.meta.updated}`;
+  document.getElementById('base-date').textContent=`Atualizado via planilha • ${DATA.meta.updated}`;
+  renderDashboard();renderSummary();renderCards();renderContas();renderProjection();renderNuConta();renderComp();renderCheck();
+  document.getElementById('nb-search').addEventListener('input',renderNbTable);
+  document.querySelectorAll('#nb-filters .chip').forEach(b=>b.addEventListener('click',()=>{
+    nbFilter=b.dataset.filter;document.querySelectorAll('#nb-filters .chip').forEach(x=>x.classList.toggle('active',x===b));renderNbTable();
+  }));
+  document.querySelectorAll('#projection-switch button').forEach(b=>b.addEventListener('click',()=>{
+    projMode=b.dataset.mode;document.querySelectorAll('#projection-switch button').forEach(x=>x.classList.toggle('active',x===b));renderProjection();
+  }));
+  document.getElementById('check-reset').addEventListener('click',()=>{
+    try{localStorage.removeItem('financas-steles-checklist-v2')}catch(e){}CHECK_STATE=Object.fromEntries(DATA.check.map((x,i)=>[i,norm(x.status)==='ok']));renderCheck();renderDashboardChecklist();
+  });
+  document.querySelectorAll('[role="button"][data-go]').forEach(x=>x.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openPage(x.dataset.go)}}));
+  let projectionResizeTimer;
+  window.addEventListener('resize',()=>{
+    if(!document.getElementById('page-parcelas').classList.contains('active')) return;
+    clearTimeout(projectionResizeTimer);
+    projectionResizeTimer=setTimeout(renderProjection,120);
+  });
+}
+loadData();
+
 </script>
 </body>
 </html>
