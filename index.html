@@ -130,6 +130,8 @@ tbody tr:hover{background:#faf8f3}tbody tr:last-child td{border-bottom:0}.money{
 .progress-fill{height:100%;background:var(--green);border-radius:999px}.progress span{font-size:8px;color:var(--muted)}
 .comp-hero{background:linear-gradient(135deg,var(--navy),#354f6a 55%,var(--purple));color:#fff;border-radius:var(--radius);
   padding:25px;box-shadow:0 18px 36px rgba(37,59,82,.2);display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:25px;margin-bottom:18px}
+.comp-hero.comp-pending{background:linear-gradient(135deg,var(--orange),#c9793f 55%,var(--yellow));box-shadow:0 18px 36px rgba(200,101,50,.25)}
+.comp-pending-date{font-size:9px;color:rgba(255,255,255,.72);margin-top:2px}
 .comp-person{text-align:center}.comp-person .avatar{margin:0 auto 8px;background:rgba(255,255,255,.13);color:#fff}.comp-person strong{display:block;font-size:14px}.comp-person span{font-size:9px;color:rgba(255,255,255,.62)}
 .comp-center{text-align:center}.comp-center .label{font-size:9px;color:rgba(255,255,255,.63);text-transform:uppercase;font-weight:800;letter-spacing:.7px}.comp-center .value{font-size:31px;font-weight:950;letter-spacing:-1px;margin:4px 0}.comp-arrow{height:2px;width:140px;background:rgba(255,255,255,.35);position:relative;margin:12px auto 0}.comp-arrow::after{content:"";position:absolute;right:-1px;top:-4px;border-left:8px solid rgba(255,255,255,.65);border-top:5px solid transparent;border-bottom:5px solid transparent}
 .comp-row.expandable{cursor:pointer}.comp-row.expandable:hover{background:var(--purple-soft)}.comp-sub{background:#faf7fc}.comp-total td{font-weight:900;background:var(--purple-soft);color:var(--purple)}
@@ -425,11 +427,17 @@ tbody tr:hover{background:#faf8f3}tbody tr:last-child td{border-bottom:0}.money{
 
     <section id="page-comp" class="page">
       <div class="page-head"><div><h2>Compensações</h2><p>Detalhamento do que Stella precisa transferir a Guilherme.</p></div><span class="tag">Fechamento</span></div>
+      <div id="comp-pending-hero" class="comp-hero comp-pending" style="display:none">
+        <div class="comp-person"><div class="avatar ste">S</div><strong>Stella</strong><span>ainda não enviou</span></div>
+        <div class="comp-center"><div class="label">Em aberto — Referente ao último mês</div><div id="comp-pending-value" class="value"></div><div id="comp-pending-date" class="comp-pending-date"></div><div class="comp-arrow"></div></div>
+        <div class="comp-person"><div class="avatar">GT</div><strong>Guilherme</strong><span>aguardando recebimento</span></div>
+      </div>
       <div class="comp-hero">
         <div class="comp-person"><div class="avatar ste">S</div><strong>Stella</strong><span>origem da transferência</span></div>
         <div class="comp-center"><div class="label">Transferência para Guilherme</div><div id="comp-total" class="value"></div><div class="comp-arrow"></div></div>
         <div class="comp-person"><div class="avatar">GT</div><strong>Guilherme</strong><span>recebe o acerto</span></div>
       </div>
+      <div id="comp-lock-notice" class="notice" style="display:none"></div>
       <article class="card">
         <div class="card-head"><div><h3>Resumo do fechamento</h3><p class="card-desc">Cartões e contas que formam a transferência.</p></div></div>
         <div id="comp-summary" class="comp-breakdown comp-summary-grid"></div>
@@ -854,8 +862,23 @@ function renderNuConta(){
   renderWaterfall('nu-waterfall',{full:true});
 }
 const COMP_OPEN={nubank:false,contas:false};
+function isoToBR(iso){return iso?iso.split('-').reverse().join('/'):''}
 function renderComp(){
+  const locked=DATA.comp.locked,pending=!!(locked&&norm(locked.status)!=='recebido');
   document.getElementById('comp-total').textContent=BRL(DATA.comp.total);
+  const pendingBlock=document.getElementById('comp-pending-hero'),noticeEl=document.getElementById('comp-lock-notice');
+  if(pending){
+    pendingBlock.style.display='';
+    document.getElementById('comp-pending-value').textContent=BRL(locked.value);
+    document.getElementById('comp-pending-date').textContent=locked.date?`Fixado em ${isoToBR(locked.date)}`:'';
+    const diff=DATA.comp.total-locked.value,noChange=Math.abs(diff)<0.5;
+    const diffTxt=noChange?'O valor ao vivo abaixo ainda é igual ao valor em aberto — nada novo entrou na planilha desde a fixação.':`Desde a fixação, a planilha já soma ${BRL(DATA.comp.total)} (${diff>=0?'+':'−'}${BRL(Math.abs(diff))}) — essa diferença entra no próximo fechamento, depois que Stella enviar o valor em aberto.`;
+    noticeEl.style.display='';
+    noticeEl.innerHTML=`<span><strong>Aguardando Stella enviar o valor em aberto.</strong> ${diffTxt}</span>`;
+  }else{
+    pendingBlock.style.display='none';
+    noticeEl.style.display='none';
+  }
   const principal=DATA.comp.items.filter(x=>!x.isTotal&&!x.isSub);
   const itau=principal.find(x=>x.d==='Cartão Itaú')?.s||0,nb=principal.find(x=>x.d==='Cartão NuBank')?.s||0,contas=principal.find(x=>x.d==='Contas')?.s||0;
   document.getElementById('comp-summary').innerHTML=[
@@ -971,7 +994,7 @@ function parseContas(rows){
 }
 function parseComp(rows){
   const items=[];
-  let total=0,mode=null;
+  let total=0,mode=null,lockedValue=null,lockedDate=null,lockedStatus=null;
   for(let r=0;r<rows.length;r++){
     const raw=cell(rows,r,1);
     if(raw===null) continue;
@@ -979,6 +1002,9 @@ function parseComp(rows){
     if(!trimmed) continue;
     const sVal=numOr0(cell(rows,r,2)),gVal=numOr0(cell(rows,r,3));
     const lower=trimmed.toLowerCase();
+    if(lower.includes('valor fixado')){lockedValue=sVal;continue}
+    if(lower.includes('data de fixa')){lockedDate=toISODate(cell(rows,r,2));continue}
+    if(lower.includes('status') && lower.includes('pagamento')){lockedStatus=txtOr(cell(rows,r,2));continue}
     if(lower.includes('transferir')){
       items.push({isTotal:true,d:trimmed,s:sVal,g:0});
       total=sVal;mode=null;continue;
@@ -995,7 +1021,8 @@ function parseComp(rows){
       items.push({d:trimmed,s:sVal,g:0,isSub:true,expandable:false});
     }
   }
-  return{items,total};
+  const locked=(lockedValue!==null&&lockedValue>0.005)?{value:lockedValue,date:lockedDate,status:lockedStatus||'Aguardando'}:null;
+  return{items,total,locked};
 }
 function parseNuConta(rows){
   const caixGui=numOr0(cell(rows,10,6)),caixSte=numOr0(cell(rows,10,7));
