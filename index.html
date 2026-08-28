@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#1f6958">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💸</text></svg>">
 <title>Finanças Steles</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
   --bg:#f4f1ea;--surface:#fffdf8;--surface-2:#f8f5ef;--ink:#1f2927;--muted:#6f7975;
@@ -130,8 +131,6 @@ tbody tr:hover{background:#faf8f3}tbody tr:last-child td{border-bottom:0}.money{
 .progress-fill{height:100%;background:var(--green);border-radius:999px}.progress span{font-size:8px;color:var(--muted)}
 .comp-hero{background:linear-gradient(135deg,var(--navy),#354f6a 55%,var(--purple));color:#fff;border-radius:var(--radius);
   padding:25px;box-shadow:0 18px 36px rgba(37,59,82,.2);display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:25px;margin-bottom:18px}
-.comp-hero.comp-pending{background:linear-gradient(135deg,var(--orange),#c9793f 55%,var(--yellow));box-shadow:0 18px 36px rgba(200,101,50,.25)}
-.comp-pending-date{font-size:9px;color:rgba(255,255,255,.72);margin-top:2px}
 .comp-person{text-align:center}.comp-person .avatar{margin:0 auto 8px;background:rgba(255,255,255,.13);color:#fff}.comp-person strong{display:block;font-size:14px}.comp-person span{font-size:9px;color:rgba(255,255,255,.62)}
 .comp-center{text-align:center}.comp-center .label{font-size:9px;color:rgba(255,255,255,.63);text-transform:uppercase;font-weight:800;letter-spacing:.7px}.comp-center .value{font-size:31px;font-weight:950;letter-spacing:-1px;margin:4px 0}.comp-arrow{height:2px;width:140px;background:rgba(255,255,255,.35);position:relative;margin:12px auto 0}.comp-arrow::after{content:"";position:absolute;right:-1px;top:-4px;border-left:8px solid rgba(255,255,255,.65);border-top:5px solid transparent;border-bottom:5px solid transparent}
 .comp-row.expandable{cursor:pointer}.comp-row.expandable:hover{background:var(--purple-soft)}.comp-sub{background:#faf7fc}.comp-total td{font-weight:900;background:var(--purple-soft);color:var(--purple)}
@@ -285,9 +284,26 @@ tbody tr:hover{background:#faf8f3}tbody tr:last-child td{border-bottom:0}.money{
   #projection-chart{height:300px;min-height:300px;overflow-x:auto;padding-bottom:6px}
   #projection-chart svg{width:900px;min-width:900px;height:300px}
 }
+
+
+/* Histórico Atual x Anterior */
+.version-switch{display:flex;gap:4px;padding:4px;background:rgba(255,253,248,.84);border:1px solid var(--line);border-radius:13px}
+.version-switch button{border:0;background:transparent;color:var(--muted);padding:7px 11px;border-radius:9px;cursor:pointer;font-size:9px;font-weight:850;white-space:nowrap;transition:.15s}
+.version-switch button:hover:not(:disabled){color:var(--green)}
+.version-switch button.active{background:var(--green);color:#fff;box-shadow:0 4px 10px rgba(31,105,88,.18)}
+.version-switch button:disabled{opacity:.38;cursor:not-allowed}
+#data-loading{position:fixed;inset:0;z-index:999;background:rgba(244,241,234,.92);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center}
+#data-loading[hidden]{display:none}
+.loading-box{min-width:270px;max-width:420px;padding:22px 24px;border-radius:18px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);text-align:center}
+.loading-spinner{width:32px;height:32px;margin:0 auto 12px;border:3px solid var(--green-soft);border-top-color:var(--green);border-radius:50%;animation:spinData .75s linear infinite}
+.loading-box strong{display:block;font-size:12px}.loading-box span{display:block;color:var(--muted);font-size:9px;margin-top:5px;line-height:1.45}
+@keyframes spinData{to{transform:rotate(360deg)}}
+@media(max-width:520px){.top-actions{align-items:flex-start;flex-direction:column}.version-switch{width:100%}.version-switch button{flex:1}.static-pill{display:inline-flex}}
+
 </style>
 </head>
 <body>
+<div id="data-loading"><div class="loading-box"><div class="loading-spinner"></div><strong>Carregando finanças…</strong><span id="loading-detail">Lendo as versões atual e anterior.</span></div></div>
 
 <div class="shell">
   <aside class="sidebar">
@@ -303,7 +319,7 @@ tbody tr:hover{background:#faf8f3}tbody tr:last-child td{border-bottom:0}.money{
       <button data-page="comp"><span class="nav-icon">⇄</span>Compensações</button>
       <button data-page="check"><span class="nav-icon">✓</span>Checklist</button>
     </nav>
-    <div class="sidebar-note"><strong>Dados ao vivo</strong>Lê o arquivo financas.xlsx desta mesma pasta a cada carregamento da página.</div>
+    <div class="sidebar-note"><strong>Histórico rápido</strong>Atual usa <b>financas.xlsx</b>. Anterior usa <b>financas_anterior.xlsx</b>. Troque a versão no topo sem recarregar a página.</div>
   </aside>
 
   <main>
@@ -313,7 +329,13 @@ tbody tr:hover{background:#faf8f3}tbody tr:last-child td{border-bottom:0}.money{
         <h1 id="main-title">Finanças Steles</h1>
         <p class="subtitle">Entradas, saídas, sobra do mês, cartões, contas, compromissos futuros, NuConta e fechamento entre Guilherme e Stella.</p>
       </div>
-      <div class="top-actions"><span id="base-date" class="static-pill">Carregando financas.xlsx…</span></div>
+      <div class="top-actions">
+        <div class="version-switch" aria-label="Versão dos dados">
+          <button id="version-current" class="active" data-version="current">Atual</button>
+          <button id="version-previous" data-version="previous">Anterior</button>
+        </div>
+        <span id="base-date" class="static-pill"></span>
+      </div>
     </header>
 
     <section id="page-dashboard" class="page">
@@ -417,7 +439,7 @@ tbody tr:hover{background:#faf8f3}tbody tr:last-child td{border-bottom:0}.money{
       <div id="nu-kpis" class="grid two"></div>
       <article class="card section-gap">
         <div class="card-head"><div><h3>Waterfall completo da NuConta</h3><p class="card-desc">Todas as movimentações, do saldo inicial ao saldo atual. Arraste horizontalmente para navegar.</p></div><span class="tag">Histórico completo</span></div>
-        <div id="nu-waterfall" class="waterfall"></div>
+        <div id="nu-waterfall" class="waterfall waterfall-scroll"></div>
       </article>
       <div class="grid equal section-gap">
         <article class="card"><div class="card-head"><div><h3>Movimentações da caixinha</h3><p class="card-desc">Histórico preservado do arquivo atual.</p></div></div><div id="nu-movements" class="movement-list"></div></article>
@@ -427,17 +449,11 @@ tbody tr:hover{background:#faf8f3}tbody tr:last-child td{border-bottom:0}.money{
 
     <section id="page-comp" class="page">
       <div class="page-head"><div><h2>Compensações</h2><p>Detalhamento do que Stella precisa transferir a Guilherme.</p></div><span class="tag">Fechamento</span></div>
-      <div id="comp-pending-hero" class="comp-hero comp-pending" style="display:none">
-        <div class="comp-person"><div class="avatar ste">S</div><strong>Stella</strong><span>ainda não enviou</span></div>
-        <div class="comp-center"><div class="label">Em aberto — Referente ao último mês</div><div id="comp-pending-value" class="value"></div><div id="comp-pending-date" class="comp-pending-date"></div><div class="comp-arrow"></div></div>
-        <div class="comp-person"><div class="avatar">GT</div><strong>Guilherme</strong><span>aguardando recebimento</span></div>
-      </div>
       <div class="comp-hero">
         <div class="comp-person"><div class="avatar ste">S</div><strong>Stella</strong><span>origem da transferência</span></div>
         <div class="comp-center"><div class="label">Transferência para Guilherme</div><div id="comp-total" class="value"></div><div class="comp-arrow"></div></div>
         <div class="comp-person"><div class="avatar">GT</div><strong>Guilherme</strong><span>recebe o acerto</span></div>
       </div>
-      <div id="comp-lock-notice" class="notice" style="display:none"></div>
       <article class="card">
         <div class="card-head"><div><h3>Resumo do fechamento</h3><p class="card-desc">Cartões e contas que formam a transferência.</p></div></div>
         <div id="comp-summary" class="comp-breakdown comp-summary-grid"></div>
@@ -457,11 +473,138 @@ tbody tr:hover{background:#faf8f3}tbody tr:last-child td{border-bottom:0}.money{
   </main>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-let DATA=null;
+const FALLBACK_DATA={"meta":{"updated":"25/07/2026","invoiceMonth":"2026-08-01"},"saldo":{"salGui":10200.0,"salSte":10000.0,"sobraGui":2098.2464047619037,"sobraSte":3520.862500000001,"nbGui":5517.521928571429,"nbSte":2097.0674999999997,"contasGui":2382.07,"contasSte":3382.07,"compGui":0.0,"compSte":0.0,"nucontaGui":500.0,"nucontaSte":1000.0,"poupancaGui":338.0,"poupancaSte":0.0},"nb":{"totals":{"total":7681.559428571428,"gui":5517.521928571429,"ste":2097.0674999999997,"pais":0.0},"entries":[{"d":"Manual","r1":"Guilherme","r2":"","r3":"","vt":258.0,"m":"Assinatura","cat":"Assinaturas-Fixo","vp":86.0,"vr":86.0,"n":3.0,"first":"2026-02-03","last":"2026-04-03","paga":6},{"d":"Muay Thai","r1":"Guilherme","r2":"","r3":"","vt":1909.3,"m":"Assinatura","cat":"Saúde","vp":190.93,"vr":190.93,"n":10.0,"first":"2026-01-03","last":"2026-10-03","paga":7},{"d":"Clube Literatura Clássica","r1":"Guilherme","r2":"Stella","r3":"","vt":1017.6,"m":"Assinatura","cat":"Fixo","vp":84.8,"vr":42.4,"n":12.0,"first":"2026-03-03","last":"2027-02-03","paga":5},{"d":"Hostinger Nano","r1":"Guilherme","r2":"Stella","r3":"","vt":224.24,"m":"Assinatura","cat":"Serviços","vp":18.686666666666667,"vr":9.343333333333334,"n":12.0,"first":"2026-06-03","last":"2027-05-03","paga":2},{"d":"HBO","r1":"Guilherme","r2":"Stella","r3":"","vt":22.45,"m":"Assinatura","cat":"Assinatura","vp":22.45,"vr":11.225,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Microsoft","r1":"Guilherme","r2":"Stella","r3":"","vt":60.0,"m":"Assinatura","cat":"Assinaturas-Fixo","vp":60.0,"vr":30.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Seguro Tokio Marine","r1":"Guilherme","r2":"Stella","r3":"","vt":395.54,"m":"Assinatura","cat":"Assinatura","vp":395.54,"vr":197.77,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Sem Parar","r1":"Guilherme","r2":"Stella","r3":"","vt":215.0,"m":"Assinatura","cat":"Assinatura","vp":215.0,"vr":107.5,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Verisure","r1":"Guilherme","r2":"Stella","r3":"","vt":225.0,"m":"Assinatura","cat":"Assinaturas-Fixo","vp":225.0,"vr":112.5,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Veroo","r1":"Guilherme","r2":"Stella","r3":"","vt":166.15,"m":"Assinatura","cat":"Assinatura","vp":166.15,"vr":83.075,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Seguro Allianz","r1":"Guilherme","r2":"","r3":"","vt":284.05,"m":"Assinatura","cat":"Fixo","vp":284.05,"vr":284.05,"n":1.0,"first":null,"last":null,"paga":null},{"d":"ChatGPT","r1":"Guilherme","r2":"","r3":"","vt":110.0,"m":"Assinatura","cat":"Serviços","vp":110.0,"vr":110.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Claude","r1":"Guilherme","r2":"","r3":"","vt":117.0,"m":"Assinatura","cat":"AI","vp":117.0,"vr":117.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Amazon Prime","r1":"Guilherme","r2":"Stella","r3":"","vt":19.9,"m":"Assinatura","cat":"Assinatura","vp":19.9,"vr":9.95,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Youtube","r1":"Guilherme","r2":"","r3":"","vt":26.9,"m":"Assinatura","cat":"Assinatura","vp":26.9,"vr":26.9,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Wellhub","r1":"Guilherme","r2":"","r3":"","vt":70.0,"m":"Assinatura","cat":"Assinatura","vp":70.0,"vr":70.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Muay Thai personal","r1":"Guilherme","r2":"","r3":"","vt":400.0,"m":"Assinatura","cat":"Fixo","vp":400.0,"vr":400.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Câmera","r1":"Guilherme","r2":"Stella","r3":"","vt":22.0,"m":"Assinatura","cat":"Fixo","vp":22.0,"vr":11.0,"n":1.0,"first":"2026-07-03","last":null,"paga":1},{"d":"Ração","r1":"Guilherme","r2":"Stella","r3":"","vt":392.0,"m":"Parcelado","cat":"Fixo","vp":196.0,"vr":98.0,"n":2.0,"first":"2026-02-03","last":"2026-03-03","paga":6},{"d":"Lavadora Midea","r1":"Guilherme","r2":"Stella","r3":"","vt":3219.0,"m":"Parcelado","cat":"Produtos","vp":268.25,"vr":134.125,"n":12.0,"first":"2025-09-03","last":"2026-08-03","paga":11},{"d":"Pacote Psiquiatra","r1":"Guilherme","r2":"","r3":"","vt":1700.0,"m":"Parcelado","cat":"Saúde","vp":283.3333333333333,"vr":283.3333333333333,"n":6.0,"first":"2026-03-03","last":"2026-08-03","paga":5},{"d":"Cinto Sabot","r1":"Guilherme","r2":"","r3":"","vt":208.0,"m":"Parcelado","cat":"Produtos","vp":52.0,"vr":52.0,"n":4.0,"first":"2026-05-03","last":"2026-08-03","paga":null},{"d":"Calça moletom","r1":"Guilherme","r2":"","r3":"","vt":128.99,"m":"Parcelado","cat":"Produtos","vp":42.99666666666667,"vr":42.99666666666667,"n":3.0,"first":"2026-06-03","last":"2026-08-03","paga":2},{"d":"Tênis Puma - A ser estornado","r1":"Guilherme","r2":"","r3":"","vt":419.0,"m":"Parcelado","cat":"Produtos","vp":41.9,"vr":41.9,"n":10.0,"first":"2025-12-03","last":"2026-09-03","paga":8},{"d":"Tênis Puma - Correto","r1":"Guilherme","r2":"","r3":"","vt":419.0,"m":"Parcelado","cat":"Produtos","vp":41.9,"vr":41.9,"n":10.0,"first":"2025-12-03","last":"2026-09-03","paga":8},{"d":"Case+Película","r1":"Guilherme","r2":"","r3":"","vt":440.0,"m":"Parcelado","cat":"Produtos","vp":88.0,"vr":88.0,"n":5.0,"first":"2026-05-03","last":"2026-09-03","paga":null},{"d":"GPS Moto","r1":"Guilherme","r2":"","r3":"","vt":313.84,"m":"Parcelado","cat":"Produtos","vp":78.46,"vr":78.46,"n":4.0,"first":"2026-06-03","last":"2026-09-03","paga":2},{"d":"Calça Sabot","r1":"","r2":"Stella","r3":"","vt":244.51,"m":"Parcelado","cat":"Roupa","vp":61.1275,"vr":61.1275,"n":4.0,"first":"2026-06-03","last":"2026-09-03","paga":2},{"d":"Revisão Royal Enfield","r1":"Guilherme","r2":"","r3":"","vt":628.0,"m":"Parcelado","cat":"Transporte","vp":157.0,"vr":157.0,"n":4.0,"first":"2026-06-14","last":"2026-09-14","paga":2},{"d":"Calça Kevlar","r1":"Guilherme","r2":"","r3":"","vt":659.0,"m":"Parcelado","cat":"Produtos","vp":54.916666666666664,"vr":54.916666666666664,"n":12.0,"first":"2025-11-03","last":"2026-10-03","paga":9},{"d":"Equipamentos Grid Motors","r1":"Guilherme","r2":"","r3":"","vt":2319.3,"m":"Parcelado","cat":"Produtos","vp":193.275,"vr":193.275,"n":12.0,"first":"2025-11-03","last":"2026-10-03","paga":9},{"d":"Racing Rabbit","r1":"Guilherme","r2":"","r3":"","vt":2000.0,"m":"Parcelado","cat":"Moto","vp":166.66666666666666,"vr":166.66666666666666,"n":12.0,"first":"2025-11-03","last":"2026-10-03","paga":9},{"d":"PS Plus Samuel","r1":"Guilherme","r2":"Stella","r3":"","vt":725.0,"m":"Parcelado","cat":"Produtos","vp":120.83333333333333,"vr":60.416666666666664,"n":6.0,"first":"2026-05-03","last":"2026-10-03","paga":3},{"d":"Capacete Stella","r1":"","r2":"Stella","r3":"","vt":973.02,"m":"Parcelado","cat":"Moto","vp":81.085,"vr":81.085,"n":12.0,"first":"2025-12-03","last":"2026-11-03","paga":8},{"d":"HDMI Splitter","r1":"Guilherme","r2":"","r3":"","vt":379.0,"m":"Parcelado","cat":"Produtos","vp":54.142857142857146,"vr":54.142857142857146,"n":7.0,"first":"2026-05-03","last":"2026-11-03","paga":3},{"d":"Caderno Azadi Store","r1":"Guilherme","r2":"","r3":"","vt":297.0,"m":"Parcelado","cat":"Produtos","vp":49.5,"vr":49.5,"n":6.0,"first":"2026-06-03","last":"2026-11-03","paga":2},{"d":"Multiprocessador","r1":"Guilherme","r2":"Stella","r3":"","vt":506.0,"m":"Parcelado","cat":"Produtos","vp":50.6,"vr":25.3,"n":10.0,"first":"2026-04-03","last":"2027-01-03","paga":null},{"d":"Jaqueta Stella","r1":"Guilherme","r2":"","r3":"","vt":1900.0,"m":"Parcelado","cat":"Produtos","vp":190.0,"vr":190.0,"n":10.0,"first":"2026-05-03","last":"2027-02-03","paga":3},{"d":"Segunda Pele Kevlar","r1":"Guilherme","r2":"","r3":"","vt":474.33,"m":"Parcelado","cat":"Produtos","vp":52.70333333333333,"vr":52.70333333333333,"n":9.0,"first":"2026-06-03","last":"2027-02-03","paga":2},{"d":"Estorno Puma","r1":"Guilherme","r2":"","r3":"","vt":-42.08,"m":"Parcelado","cat":"Estorno","vp":-42.08,"vr":-42.08,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Estorno Jaqueta Grid Motors","r1":"Guilherme","r2":"","r3":"","vt":-64.42,"m":"Parcelado","cat":"Estorno","vp":-64.42,"vr":-64.42,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Rog Ally Dock","r1":"Guilherme","r2":"","r3":"","vt":286.39,"m":"Parcelado","cat":"Produtos","vp":28.639,"vr":28.639,"n":10.0,"first":"2026-06-03","last":"2027-03-03","paga":2},{"d":"Wolverine Pré venda","r1":"Guilherme","r2":"","r3":"","vt":399.9,"m":"Parcelado","cat":"Roupa","vp":57.128571428571426,"vr":57.128571428571426,"n":7.0,"first":"2026-07-03","last":"2027-01-03","paga":1},{"d":"Jogos PSN","r1":"Guilherme","r2":"","r3":"","vt":372.43,"m":"Parcelado","cat":"Produtos","vp":93.1075,"vr":93.1075,"n":4.0,"first":"2026-07-03","last":"2026-10-03","paga":1},{"d":"Luva Fairtex","r1":"Guilherme","r2":"","r3":"","vt":1181.14,"m":"Parcelado","cat":"Produtos","vp":118.114,"vr":118.114,"n":10.0,"first":"2026-07-03","last":"2027-04-03","paga":1},{"d":"Pedrinho Bancos","r1":"Guilherme","r2":"Stella","r3":"","vt":1780.0,"m":"Parcelado","cat":"Produtos","vp":222.5,"vr":111.25,"n":8.0,"first":null,"last":null,"paga":null},{"d":"Blood of the Dawnwalker","r1":"","r2":"","r3":"","vt":300.0,"m":"Parcelado","cat":"Produtos","vp":50.0,"vr":0.0,"n":6.0,"first":"2026-08-03","last":"2027-01-03","paga":null},{"d":"Escapamento JBK","r1":"Guilherme","r2":"","r3":"","vt":284.0,"m":"Parcelado","cat":"Moto","vp":47.333333333333336,"vr":47.333333333333336,"n":6.0,"first":"2026-08-03","last":"2027-01-03","paga":null},{"d":"The Alters","r1":"Guilherme","r2":"","r3":"","vt":55.0,"m":"Pontual","cat":"Jogos","vp":55.0,"vr":55.0,"n":1.0,"first":"2026-08-03","last":null,"paga":null},{"d":"Psicóloga","r1":"Guilherme","r2":"","r3":"","vt":498.0,"m":"Pontual","cat":"Saúde","vp":498.0,"vr":498.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Bonfas Chope","r1":"Guilherme","r2":"Stella","r3":"","vt":40.0,"m":"Pontual","cat":"Cm","vp":40.0,"vr":20.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Bonfas Lanche","r1":"Guilherme","r2":"","r3":"","vt":32.0,"m":"Pontual","cat":"Sem categoria","vp":32.0,"vr":32.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Remédios Stella","r1":"","r2":"Stella","r3":"","vt":166.0,"m":"Pontual","cat":"Sem categoria","vp":166.0,"vr":166.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Ração Brida","r1":"Guilherme","r2":"Stella","r3":"","vt":74.0,"m":"Pontual","cat":"Sem categoria","vp":74.0,"vr":37.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Pagamento Ração Brida","r1":"Guilherme","r2":"","r3":"","vt":-37.0,"m":"Pontual","cat":"Sem categoria","vp":-37.0,"vr":-37.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Moletom Brutal Kill","r1":"Guilherme","r2":"","r3":"","vt":279.0,"m":"Parcelado","cat":"Sem categoria","vp":27.9,"vr":27.9,"n":10.0,"first":"2026-08-03","last":"2027-05-03","paga":null},{"d":"Uber Mr. Jones","r1":"Guilherme","r2":"Stella","r3":"","vt":36.0,"m":"Pontual","cat":"Sem categoria","vp":36.0,"vr":18.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Gibs","r1":"Guilherme","r2":"","r3":"","vt":35.0,"m":"Pontual","cat":"Sem categoria","vp":35.0,"vr":35.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Serviço de nuvem da câmera","r1":"Guilherme","r2":"Stella","r3":"","vt":75.0,"m":"Pontual","cat":"Sem categoria","vp":75.0,"vr":37.5,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Rappi","r1":"Guilherme","r2":"Stella","r3":"","vt":74.0,"m":"Pontual","cat":"Sem categoria","vp":74.0,"vr":37.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Gasolina","r1":"","r2":"Stella","r3":"","vt":107.5,"m":"Pontual","cat":"Sem categoria","vp":107.5,"vr":107.5,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Gasolina","r1":"Guilherme","r2":"","r3":"","vt":37.5,"m":"Pontual","cat":"Sem categoria","vp":37.5,"vr":37.5,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Lanche","r1":"Guilherme","r2":"","r3":"","vt":50.0,"m":"Pontual","cat":"Sem categoria","vp":50.0,"vr":50.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Gibis","r1":"Guilherme","r2":"","r3":"","vt":35.0,"m":"Pontual","cat":"Sem categoria","vp":35.0,"vr":35.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Bonffas Beer","r1":"Guilherme","r2":"","r3":"","vt":52.14,"m":"Pontual","cat":"Sem categoria","vp":52.14,"vr":52.14,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Gasolina Pirassunusng","r1":"Guilherme","r2":"Stella","r3":"","vt":130.01,"m":"Pontual","cat":"Sem categoria","vp":130.01,"vr":65.005,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Hot Wheels","r1":"Guilherme","r2":"","r3":"","vt":99.0,"m":"Pontual","cat":"Sem categoria","vp":99.0,"vr":99.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Pagamento Hot Wheels","r1":"Guilherme","r2":"","r3":"","vt":-99.0,"m":"Pontual","cat":"Sem categoria","vp":-99.0,"vr":-99.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Kikão","r1":"Guilherme","r2":"Stella","r3":"","vt":139.0,"m":"Pontual","cat":"Sem categoria","vp":139.0,"vr":69.5,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Gasolina de Volta","r1":"","r2":"Stella","r3":"","vt":100.0,"m":"Pontual","cat":"Sem categoria","vp":100.0,"vr":100.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Odisseia","r1":"Guilherme","r2":"Stella","r3":"","vt":90.0,"m":"Pontual","cat":"Sem categoria","vp":90.0,"vr":45.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Pagamento Odisseia","r1":"Guilherme","r2":"","r3":"","vt":-45.0,"m":"Pontual","cat":"Sem categoria","vp":-45.0,"vr":-45.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Ifood","r1":"Guilherme","r2":"Stella","r3":"","vt":79.0,"m":"Pontual","cat":"Sem categoria","vp":79.0,"vr":39.5,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Mercado","r1":"Guilherme","r2":"Stella","r3":"","vt":56.27,"m":"Pontual","cat":"Sem categoria","vp":56.27,"vr":28.135,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Rappi 1","r1":"Guilherme","r2":"Stella","r3":"","vt":82.49,"m":"Pontual","cat":"Sem categoria","vp":82.49,"vr":41.245,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Rappi 2","r1":"Guilherme","r2":"Stella","r3":"","vt":49.91,"m":"Pontual","cat":"Sem categoria","vp":49.91,"vr":24.955,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Saco de lixo e copo descartável","r1":"Guilherme","r2":"Stella","r3":"","vt":41.5,"m":"Pontual","cat":"Sem categoria","vp":41.5,"vr":20.75,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Mr Jones","r1":"Guilherme","r2":"","r3":"","vt":106.04,"m":"Pontual","cat":"Sem categoria","vp":106.04,"vr":106.04,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Uber Mr. Jones","r1":"","r2":"","r3":"","vt":16.97,"m":"Pontual","cat":"Sem categoria","vp":16.97,"vr":0.0,"n":1.0,"first":null,"last":null,"paga":null},{"d":"Renner - Presente Stella","r1":"Guilherme","r2":"","r3":"","vt":72.0,"m":"Parcelado","cat":"Sem categoria","vp":24.0,"vr":24.0,"n":3.0,"first":"2026-08-06","last":"2026-10-06","paga":null},{"d":"Renner Stella","r1":"","r2":"Stella","r3":"","vt":161.73,"m":"Parcelado","cat":"Sem categoria","vp":53.91,"vr":53.91,"n":3.0,"first":"2026-08-06","last":"2026-10-06","paga":null},{"d":"Baked Potato","r1":"Guilherme","r2":"","r3":"","vt":50.0,"m":"Pontual","cat":"Sem categoria","vp":50.0,"vr":50.0,"n":1.0,"first":null,"last":null,"paga":null}]},"itau":{"totals":{"total":40.16166666666667,"gui":40.16166666666667,"ste":0.0,"pais":0.0},"entries":[{"d":"Control Resonant","r1":"Guilherme","r2":"","r3":"","vt":240.97,"m":"Parcelado","cat":"Jogos","vp":40.16166666666667,"vr":40.16166666666667,"n":6.0,"first":"2026-08-03","last":"2027-01-03","paga":null}]},"contas":[{"d":"Aluguel","r1":"Guilherme","r2":"Stella","r3":"","v":3235.67,"pr":1617.835},{"d":"Vivo","r1":"Guilherme","r2":"Stella","r3":"","v":444.0,"pr":222.0},{"d":"Luz","r1":"Guilherme","r2":"Stella","r3":"","v":360.0,"pr":180.0},{"d":"Água","r1":"Guilherme","r2":"Stella","r3":"","v":86.7,"pr":43.35},{"d":"Gás","r1":"Guilherme","r2":"Stella","r3":"","v":46.0,"pr":23.0},{"d":"Verisure","r1":"Guilherme","r2":"Stella","r3":"","v":224.77,"pr":112.385},{"d":"Seguranças+Câmera+Seguro Residencial","r1":"Guilherme","r2":"Stella","r3":"","v":367.0,"pr":183.5},{"d":"Cartão Itaú da Stella","r1":"","r2":"Stella","r3":"","v":1000.0,"pr":1000.0}],"comp":{"items":[{"d":"Cartão Itaú","s":0.0,"g":40.16166666666667,"isSub":false,"expandable":false},{"d":"Cartão NuBank","s":2097.0674999999997,"g":5517.521928571429,"isSub":false,"expandable":true},{"d":"Contas","s":2047.685,"g":0.0,"isSub":false,"expandable":true},{"d":"Aluguel","s":1617.835,"g":0.0,"isSub":true,"expandable":false},{"d":"Vivo","s":222.0,"g":0.0,"isSub":true,"expandable":false},{"d":"Luz","s":180.0,"g":0.0,"isSub":true,"expandable":false},{"d":"Água","s":43.35,"g":0.0,"isSub":true,"expandable":false},{"d":"Gás","s":23.0,"g":0.0,"isSub":true,"expandable":false},{"d":"Seguranças+Câmera","s":183.5,"g":0.0,"isSub":true,"expandable":false},{"isTotal":true,"d":"Stella tem que transferir:","s":4144.7525,"g":0.0}],"total":4144.7525},"nuconta":{"caixGui":4597.1500000000015,"caixSte":0.0,"initialBalance":15250.0,"movsCaixinha":[{"d":"Tirando da Caixinha Turbo","v":773.35},{"d":"Adiantamento Stella Janeiro","v":-5148.0},{"d":"Ajuste NuConta","v":-168.0},{"d":"Cidadania+Veterinário Brida","v":-1700.0},{"d":"Devolução Stella","v":5148.0},{"d":"Salário afastamento","v":-4938.0},{"d":"Emergência Geleia+Vurtuoso+Terra Brasa","v":-1595.0},{"d":"Adiantamento Stella","v":-4677.0},{"d":"Galpãozin","v":-200.0},{"d":"Devolução Stella","v":4677.0},{"d":"Fisioterapia Stella","v":-750.0},{"d":"Pagamento Fasolina + Almoço Shirley + Linkedin+Bonfas","v":-652.0},{"d":"INSS","v":11100.0},{"d":"Pagamento Superbowl","v":-396.0},{"d":"Adiantamento Stella","v":-4211.0},{"d":"SiSenor","v":-450.0},{"d":"Alemão","v":-1197.0},{"d":"GPS Moto","v":-315.0},{"d":"Portão","v":-830.0},{"d":"Devolução  Stella","v":4211.0},{"d":"Bonfa's","v":-200.0},{"d":"Ilumeo Março - WillBank","v":10000.0},{"d":"Remédio e Consulta Stella","v":-200.0},{"d":"Pagamentos","v":-381.0},{"d":"Adiantamento Stella","v":-4911.0},{"d":"Adiantamento INSS","v":-5700.0},{"d":"Adicional","v":-400.0},{"d":"Pagamentos fds Páscoa","v":-450.0},{"d":"Portão segunda parte","v":-640.0},{"d":"Devolução INSS","v":5700.0},{"d":"Páscoa","v":-130.0},{"d":"Psicólogo Stella","v":-250.0},{"d":"Estadia Lucky","v":-112.2},{"d":"Devolução Stella","v":4911.0},{"d":"Completar INSS Maio","v":-3000.0},{"d":"PS5 Samuel","v":-4000.0},{"d":"Madero","v":-200.0},{"d":"Adiantamento Stella","v":-4612.0},{"d":"Monitor Daniel","v":-700.0},{"d":"Nano","v":-880.0},{"d":"Conserto Meriva","v":-310.0},{"d":"Pagamento Capinha e si senor","v":-250.0},{"d":"Devolução Stella","v":4690.0},{"d":"Adiantamento Stella","v":-4440.0},{"d":"Adiantamento ROG","v":-4697.0},{"d":"Completar salário Junho","v":-2500.0},{"d":"Gigio","v":-126.0},{"d":"Devolução Stella (325 do PS5)","v":4742.0},{"d":"Pagamentos","v":-410.0},{"d":"Julho - Bônus","v":3320.0},{"d":"Julho - 40% 13º","v":4090.0},{"d":"Julho - Pagamentos Necessários","v":-5688.0},{"d":"Adiantamento Stella","v":-4433.0},{"d":"Pagamento Edilson","v":-250.0},{"d":"Hot Wheels","v":-99.0},{"d":"Dinheiro Nano","v":320.0},{"d":"Recolhimento Receita","v":-1572.0},{"d":"Devolução Stella","v":4433.0}],"reserved":[{"d":"Adiantamento Salário","v":4912.0},{"d":"Seguro","v":101.0},{"d":"Reembolso Psicóloga","v":338.0}],"reservedTotal":5351.0},"check":[{"conta":"Aluguel","status":"OK","obs":""},{"conta":"Vivo","status":"OK","obs":""},{"conta":"Luz","status":"Ok","obs":""},{"conta":"Água","status":"OK","obs":""},{"conta":"Gás","status":"Ok","obs":""},{"conta":"Câmeras","status":"Ok","obs":""},{"conta":"NuBank","status":"Ok","obs":""},{"conta":"Seu João","status":"","obs":""},{"conta":"Dera","status":"OK","obs":""}]};
+let DATA=FALLBACK_DATA;
+let REF_DATE=new Date(`${DATA.meta.invoiceMonth}T00:00:00`);
+const SNAPSHOT_FILES={current:'./financas.xlsx',previous:'./financas_anterior.xlsx'};
+const SNAPSHOTS={};
+let ACTIVE_SNAPSHOT='current';
 
-let REF_DATE=null;
+const rawStr=v=>(v==null?'':String(v)).trim();
+const rawNum=v=>{const n=typeof v==='number'?v:parseFloat(v);return Number.isFinite(n)?n:0};
+const normRaw=v=>rawStr(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+function excelDateISO(v){
+  if(v==null||v==='') return null;
+  if(v instanceof Date&&!isNaN(v)){const y=v.getFullYear(),m=String(v.getMonth()+1).padStart(2,'0'),d=String(v.getDate()).padStart(2,'0');return `${y}-${m}-${d}`}
+  if(typeof v==='number'&&v>15000&&v<100000&&typeof XLSX!=='undefined'){
+    const p=XLSX.SSF.parse_date_code(v);if(p){return `${p.y}-${String(p.m).padStart(2,'0')}-${String(p.d).padStart(2,'0')}`}
+  }
+  const t=rawStr(v),br=t.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/);
+  if(br){let y=Number(br[3]);if(y<100)y+=2000;return `${y}-${String(Number(br[2])).padStart(2,'0')}-${String(Number(br[1])).padStart(2,'0')}`}
+  const iso=t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(iso)return `${iso[1]}-${String(Number(iso[2])).padStart(2,'0')}-${String(Number(iso[3])).padStart(2,'0')}`;
+  return null;
+}
+function formatDateBR(date){return date.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})}
+function monthKeyISO(date){return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-01`}
+function sheetRows(wb,name){
+  if(wb.Sheets[name]) return XLSX.utils.sheet_to_json(wb.Sheets[name],{header:1,defval:null,raw:true});
+  const target=normRaw(name).slice(0,6),key=Object.keys(wb.Sheets).find(k=>normRaw(k).includes(target));
+  return key?XLSX.utils.sheet_to_json(wb.Sheets[key],{header:1,defval:null,raw:true}):[];
+}
+function findHeaderCol(row,terms,fallback=-1){
+  const arr=Array.isArray(terms)?terms:[terms];
+  const i=row.findIndex(c=>arr.some(t=>normRaw(c).includes(normRaw(t))));return i>=0?i:fallback;
+}
+function parseSaldo(wb){
+  const data=sheetRows(wb,'Saldo'),r={salGui:0,salSte:0,sobraGui:0,sobraSte:0,nbGui:0,nbSte:0,contasGui:0,contasSte:0,compGui:0,compSte:0,nucontaGui:0,nucontaSte:0,poupancaGui:0,poupancaSte:0};
+  const hdr=data.find(row=>row.some(c=>normRaw(c)==='guilherme')&&row.some(c=>normRaw(c)==='stella'));if(!hdr)return r;
+  const g=hdr.findIndex(c=>normRaw(c)==='guilherme'),st=hdr.findIndex(c=>normRaw(c)==='stella'),lbl=Math.max(0,g-1),hi=data.indexOf(hdr);
+  if(data[hi+1]){r.sobraGui=rawNum(data[hi+1][g]);r.sobraSte=rawNum(data[hi+1][st])}
+  data.forEach(row=>{
+    const l=normRaw(row[lbl]),gv=rawNum(row[g]),sv=rawNum(row[st]);
+    if(l==='salario'){r.salGui=gv;r.salSte=sv}
+    else if(l.includes('cartao nubank')){r.nbGui=gv;r.nbSte=sv}
+    else if(l==='contas'||l.includes('contas fixas')){r.contasGui=gv;r.contasSte=sv}
+    else if(l.includes('dinheiro para nuconta')||l.includes('dinheiro para nu conta')){r.nucontaGui=gv;r.nucontaSte=sv}
+    else if(l.includes('dinheiro guardado')&&l.includes('poup')){r.poupancaGui=gv;r.poupancaSte=sv}
+    else if(l.includes('compens')){r.compGui=gv;r.compSte=sv}
+  });return r;
+}
+function parseCardEntries(wb,sheetName,totalLabel){
+  const data=sheetRows(wb,sheetName);let totals={total:0,gui:0,ste:0,pais:0},entries=[];
+  for(let i=0;i<data.length;i++){
+    const row=data[i],t=row.findIndex(c=>normRaw(c)===normRaw(totalLabel));if(t<0)continue;
+    const g=row.findIndex(c=>normRaw(c)==='guilherme'),st=row.findIndex(c=>normRaw(c)==='stella'),p=row.findIndex(c=>normRaw(c)==='pais'),v=data[i+1]||[];
+    totals={total:rawNum(v[t]),gui:g>=0?rawNum(v[g]):0,ste:st>=0?rawNum(v[st]):0,pais:p>=0?rawNum(v[p]):0};break;
+  }
+  let header=null,desc=-1;
+  for(const row of data){const i=row.findIndex(c=>normRaw(c)==='descricao');if(i>=0){header=row;desc=i;break}}
+  if(!header)return {totals,entries};
+  const start=data.indexOf(header)+1;
+  const vt=findHeaderCol(header,['valor total'],desc+5),mode=findHeaderCol(header,['modo de pagamento','modo pagamento'],desc+6),cat=findHeaderCol(header,['categoria'],desc+7),vp=findHeaderCol(header,['valor da parcela','valor parcela'],desc+8),vr=findHeaderCol(header,['valor por respons','valor respons'],desc+9),n=findHeaderCol(header,['quantidade de parcelas','qtd parcelas','numero de parcelas'],desc+10),first=findHeaderCol(header,['primeira parcela','1a parcela','1ª parcela'],desc+11),last=findHeaderCol(header,['ultima parcela','última parcela'],desc+12),paid=findHeaderCol(header,['parcelas pagas'],desc+13);
+  for(let i=start;i<data.length;i++){
+    const row=data[i],d=rawStr(row[desc]);if(!d)continue;const total=rawNum(row[vt]),parcel=rawNum(row[vp]);if(!total&&!parcel)continue;
+    let m=rawStr(row[mode]);if(!m||normRaw(m)==='a vista')m='Pontual';
+    entries.push({d,r1:rawStr(row[desc+1]),r2:rawStr(row[desc+2]),r3:rawStr(row[desc+3]),vt:total,m,cat:rawStr(row[cat]),vp:parcel,vr:rawNum(row[vr]),n:rawNum(row[n]),first:excelDateISO(row[first]),last:excelDateISO(row[last]),paga:row[paid]==null?null:rawNum(row[paid])});
+  }
+  if(!totals.total&&entries.length){
+    totals.total=entries.reduce((a,x)=>a+x.vp,0);entries.forEach(x=>{const owners=[x.r1,x.r2,x.r3].map(normRaw);if(owners.includes('guilherme'))totals.gui+=x.vr;if(owners.includes('stella'))totals.ste+=x.vr;if(owners.includes('pais'))totals.pais+=x.vr});
+  }
+  return {totals,entries};
+}
+function parseContas(wb){
+  const data=sheetRows(wb,'Contas');let header=null,desc=-1;for(const row of data){const i=row.findIndex(c=>normRaw(c)==='descricao');if(i>=0){header=row;desc=i;break}}if(!header)return [];
+  const vt=findHeaderCol(header,['valor total'],desc+5),pr=findHeaderCol(header,['por pessoa','valor por respons'],desc+7),out=[];
+  for(let i=data.indexOf(header)+1;i<data.length;i++){const row=data[i],d=rawStr(row[desc]),v=rawNum(row[vt]);if(!d||!v)continue;out.push({d,r1:rawStr(row[desc+1]),r2:rawStr(row[desc+2]),r3:rawStr(row[desc+3]),v,pr:rawNum(row[pr])})}return out;
+}
+function parseComp(wb){
+  const data=sheetRows(wb,'Compensas'),hdr=data.find(row=>row.some(c=>normRaw(c)==='stella'));if(!hdr)return {items:[],total:0};
+  const st=hdr.findIndex(c=>normRaw(c)==='stella'),g=hdr.findIndex(c=>normRaw(c)==='guilherme'),lbl=Math.max(0,st-1),items=[];
+  data.forEach(row=>{const raw=row[lbl],d=rawStr(raw);if(!d||normRaw(d)==='stella'||normRaw(d)==='guilherme')return;const sv=rawNum(row[st]),gv=g>=0?rawNum(row[g]):0;if(normRaw(d).includes('stella tem que'))items.push({isTotal:true,d,s:sv,g:0});else items.push({d,s:sv,g:gv,isSub:String(raw??'').startsWith(' '),expandable:d==='Cartão NuBank'||d==='Contas'})});
+  return {items,total:items.find(x=>x.isTotal)?.s||0};
+}
+function parseNuConta(wb){
+  const data=sheetRows(wb,'NuConta');let caixGui=0,caixSte=0,gcol=-1,scol=-1;const movsCaixinha=[],reserved=[];let initialBalance=null;
+  for(const row of data){const gi=row.findIndex(c=>normRaw(c)==='caixinha guilherme'),si=row.findIndex(c=>normRaw(c)==='caixinha stella');if(gi>=0||si>=0){gcol=gi>=0?gi:si-1;scol=si>=0?si:gi+1;break}}
+  for(const row of data){if(row.some(c=>normRaw(c)==='sem turbo')){if(gcol>=0)caixGui=rawNum(row[gcol]);if(scol>=0)caixSte=rawNum(row[scol]);break}}
+  const movCols=[];data.forEach(row=>row.forEach((c,i)=>{if(normRaw(c)==='movimentacao'&&!movCols.includes(i))movCols.push(i)}));
+  const skip=new Set(['','movimentacao','total','ipvas + licenciamento','com turbo','sem turbo','caixinha guilherme','caixinha stella','caixinha turbo','para retirar mes que vem?']);
+  movCols.forEach(col=>{const isCash=gcol>=0?col<gcol:col===movCols[0];data.forEach(row=>{const d=rawStr(row[col]),dn=normRaw(d);if(!d)return;let val=null;for(let off=1;off<=3;off++){if(typeof row[col+off]==='number'){val=row[col+off];break}}if(val==null)return;if(dn==='saldo inicial'&&isCash){initialBalance=rawNum(val);return}if(skip.has(dn)||dn==='saldo inicial')return;(isCash?movsCaixinha:reserved).push({d,v:rawNum(val)})})});
+  if(initialBalance==null)initialBalance=caixGui+caixSte-movsCaixinha.reduce((a,x)=>a+x.v,0);
+  return {caixGui,caixSte,initialBalance,movsCaixinha,reserved,reservedTotal:reserved.reduce((a,x)=>a+x.v,0)};
+}
+function parseChecklist(wb){
+  const data=sheetRows(wb,'Checklist');if(!data.length)return [];
+  let header=null,desc=-1,status=-1,obs=-1;
+  for(const row of data){const st=row.findIndex(c=>normRaw(c)==='status');if(st>=0){header=row;status=st;desc=row.findIndex(c=>['conta','descricao','pagamento'].some(t=>normRaw(c).includes(t)));if(desc<0)desc=Math.max(0,st-1);obs=row.findIndex(c=>normRaw(c).includes('obs'));break}}
+  if(!header)return [];
+  const out=[];for(let i=data.indexOf(header)+1;i<data.length;i++){const row=data[i],conta=rawStr(row[desc]);if(!conta)continue;out.push({conta,status:rawStr(row[status]),obs:obs>=0?rawStr(row[obs]):''})}return out;
+}
+function inferMeta(wb,nb,itau){
+  const entries=[...nb.entries,...itau.entries],firstDates=entries.map(x=>x.first).filter(Boolean).map(x=>new Date(`${x}T00:00:00`)).filter(d=>!isNaN(d));
+  let invoice=firstDates.length?new Date(Math.max(...firstDates.map(d=>d.getTime()))):null;
+  const saldo=sheetRows(wb,'Saldo');let found=null;
+  outer:for(const row of saldo.slice(0,30)){for(const cell of row){const t=rawStr(cell),m=t.match(/\b(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?\b/);if(m){let y=m[3]?Number(m[3]):new Date().getFullYear();if(y<100)y+=2000;found=new Date(y,Number(m[2])-1,Number(m[1]));break outer}}}
+  let modified=wb.Props&&wb.Props.ModifiedDate?new Date(wb.Props.ModifiedDate):null;if(modified&&isNaN(modified))modified=null;
+  const updated=found||modified||new Date();if(!invoice){invoice=new Date(updated.getFullYear(),updated.getMonth()+1,1)}else invoice=new Date(invoice.getFullYear(),invoice.getMonth(),1);
+  return {updated:formatDateBR(updated),invoiceMonth:monthKeyISO(invoice)};
+}
+function workbookToData(wb){
+  const saldo=parseSaldo(wb),nb=parseCardEntries(wb,'NuBank','NuBank Total'),itau=parseCardEntries(wb,'Itaú','Itaú Total'),contas=parseContas(wb),comp=parseComp(wb),nuconta=parseNuConta(wb),check=parseChecklist(wb),meta=inferMeta(wb,nb,itau);
+  return {meta,saldo,nb,itau,contas,comp,nuconta,check};
+}
+async function loadSnapshot(key){
+  const resp=await fetch(`${SNAPSHOT_FILES[key]}?v=${Date.now()}`,{cache:'no-store'});if(!resp.ok)throw new Error(`${SNAPSHOT_FILES[key]}: HTTP ${resp.status}`);
+  const buf=await resp.arrayBuffer(),wb=XLSX.read(buf,{type:'array',cellDates:true});return workbookToData(wb);
+}
+function snapshotMonthLabel(data,short=false){const d=new Date(`${data.meta.invoiceMonth}T00:00:00`);return d.toLocaleDateString('pt-BR',short?{month:'short',year:'2-digit'}:{month:'long',year:'numeric'}).replace('.','')}
+function checkStorageKey(){return `financas-steles-checklist-v3-${ACTIVE_SNAPSHOT}-${DATA.meta.invoiceMonth}`}
+function setLoading(show,detail=''){const el=document.getElementById('data-loading');if(!el)return;el.hidden=!show;if(detail)document.getElementById('loading-detail').textContent=detail}
+function updateSnapshotUI(){
+  const cur=document.getElementById('version-current'),prev=document.getElementById('version-previous');
+  cur.classList.toggle('active',ACTIVE_SNAPSHOT==='current');prev.classList.toggle('active',ACTIVE_SNAPSHOT==='previous');
+  cur.textContent=SNAPSHOTS.current?`Atual · ${snapshotMonthLabel(SNAPSHOTS.current,true)}`:'Atual';
+  prev.textContent=SNAPSHOTS.previous?`Anterior · ${snapshotMonthLabel(SNAPSHOTS.previous,true)}`:'Anterior';prev.disabled=!SNAPSHOTS.previous;
+  document.getElementById('main-title').textContent=`Finanças Steles - ${DATA.meta.updated}`;document.title=`Finanças Steles - ${DATA.meta.updated}`;
+  document.getElementById('base-date').textContent=`${ACTIVE_SNAPSHOT==='current'?'Atual':'Anterior'} • Fatura ${snapshotMonthLabel(DATA)}`;
+}
+function renderAllViews(){
+  REF_DATE=new Date(`${DATA.meta.invoiceMonth}T00:00:00`);CHECK_STATE=getCheckState();COMP_OPEN.nubank=false;COMP_OPEN.contas=false;
+  renderDashboard();renderSummary();renderCards();renderContas();renderProjection();renderNuConta();renderComp();renderCheck();updateSnapshotUI();
+}
+function activateSnapshot(key){if(!SNAPSHOTS[key]||key===ACTIVE_SNAPSHOT)return;ACTIVE_SNAPSHOT=key;DATA=SNAPSHOTS[key];renderAllViews()}
+
 const BRL=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n)||0);
 const NUM=v=>Number.isFinite(Number(v))?Number(v):0;
 const TXT=v=>v==null?'':String(v).trim();
@@ -716,23 +859,6 @@ function currentModeTotals(){
   const other=cardTotal-parcel-subscription;
   return {parcel,subscription,other};
 }
-function wrapLabel(text,maxChars,maxLines=3){
-  const words=String(text).split(/\s+/).filter(Boolean),lines=[];
-  let cur='';
-  words.forEach(w=>{
-    if(!cur){cur=w;return}
-    if((cur+' '+w).length<=maxChars){cur+=' '+w}
-    else{lines.push(cur);cur=w}
-  });
-  if(cur) lines.push(cur);
-  if(!lines.length) lines.push('');
-  if(lines.length>maxLines){
-    const kept=lines.slice(0,maxLines);
-    kept[maxLines-1]=kept[maxLines-1].slice(0,Math.max(1,maxChars-1))+'…';
-    return kept;
-  }
-  return lines;
-}
 function renderWaterfall(id,{full=false}={}){
   const n=DATA.nuconta,final=NUM(n.caixGui)+NUM(n.caixSte),all=n.movsCaixinha;
   let movements;
@@ -747,38 +873,32 @@ function renderWaterfall(id,{full=false}={}){
   let cumulative=initial;
   movements.forEach(x=>{const before=cumulative;cumulative+=NUM(x.v);points.push({label:x.d,type:x.v>=0?'positive':'negative',value:x.v,before,after:cumulative})});
   points.push({label:'Saldo atual',type:'total',value:final,before:0,after:final});
-  const W=full?Math.max(1500,points.length*104):980,L=58,R=24,T=28,plotH=full?254:214,lineHeight=10,charWidth=4.3;
-  const slot=(W-L-R)/points.length,barW=Math.max(22,Math.min(58,slot*.58));
-  const maxChars=Math.max(7,Math.floor((slot*.95)/charWidth));
-  const wrapped=points.map(p=>wrapLabel(p.label,maxChars));
-  const maxLines=Math.max(1,...wrapped.map(l=>l.length));
-  const B=34+maxLines*lineHeight,H=T+plotH+B;
+  const W=full?Math.max(1500,points.length*104):980,H=full?370:330,L=58,R=24,T=28,B=88,plotW=W-L-R,plotH=H-T-B;
   const allLevels=points.flatMap(p=>[p.before,p.after,0]),min=Math.min(...allLevels),max=Math.max(...allLevels),range=Math.max(1,max-min);
-  const y=v=>T+(max-v)/range*plotH;
+  const y=v=>T+(max-v)/range*plotH,slot=plotW/points.length,barW=Math.max(22,Math.min(58,slot*.58));
   let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Waterfall ${full?'completo':'recente'} das movimentações da NuConta" style="${full?`width:${W}px;height:${H}px`:'width:100%;height:auto'}"><line x1="${L}" y1="${y(0)}" x2="${W-R}" y2="${y(0)}" stroke="#cfcfc8" stroke-width="1"/>`;
   points.forEach((p,i)=>{
     const cx=L+slot*i+slot/2,x=cx-barW/2,from=p.type==='total'?0:p.before,to=p.after;
     const top=Math.min(y(from),y(to)),height=Math.max(3,Math.abs(y(from)-y(to))),color=p.type==='total'?'#253b52':p.type==='positive'?'#1f6958':'#c86532';
     if(i>0&&i<points.length-1){const prev=points[i-1],connectorY=y(prev.after);svg+=`<line x1="${L+slot*(i-1)+slot/2+barW/2}" y1="${connectorY}" x2="${x}" y2="${connectorY}" stroke="#aeb3b0" stroke-dasharray="4 4"/>`}
     svg+=`<rect x="${x}" y="${top}" width="${barW}" height="${height}" rx="5" fill="${color}"><title>${p.label}: ${p.type==='total'?BRL(p.after):(p.value>=0?'+ ':'− ')+BRL(Math.abs(p.value))} · Saldo após: ${BRL(p.after)}</title></rect>`;
-    const lines=wrapped[i],startY=H-B+lineHeight+4;
-    const tspans=lines.map((ln,li)=>`<tspan x="${cx}" dy="${li===0?0:lineHeight}">${ln}</tspan>`).join('');
-    svg+=`<text x="${cx}" y="${startY}" text-anchor="middle" font-size="8" fill="#6f7975">${tspans}</text>`;
+    const short=p.label.length>18?p.label.slice(0,16)+'…':p.label;
+    svg+=`<text x="${cx}" y="${H-53}" text-anchor="middle" font-size="8" fill="#6f7975" transform="rotate(-30 ${cx} ${H-53})">${short}</text>`;
     svg+=`<text x="${cx}" y="${Math.max(13,top-5)}" text-anchor="middle" font-size="8" font-weight="700" fill="${color}">${p.type==='total'?BRL(p.after).replace('R$ ','R$'):((p.value>=0?'+':'−')+Math.abs(p.value).toFixed(0))}</text>`;
   });
   svg+='</svg>';
-  const chart=full?`<div class="waterfall-scroll"><div class="waterfall-wide" style="width:${W}px">${svg}</div></div>`:svg;
+  const chart=full?`<div class="waterfall-wide" style="width:${W}px">${svg}</div>`:svg;
   document.getElementById(id).innerHTML=chart+`<div class="waterfall-legend"><span><i class="waterfall-key" style="background:#253b52"></i>Saldo</span><span><i class="waterfall-key" style="background:#1f6958"></i>Entrada</span><span><i class="waterfall-key" style="background:#c86532"></i>Saída</span></div>`;
 }
 function getCheckState(){
   const initial=Object.fromEntries(DATA.check.map((x,i)=>[i,norm(x.status)==='ok']));
   try{
-    const saved=JSON.parse(localStorage.getItem('financas-steles-checklist-v2')||'null');
+    const saved=JSON.parse(localStorage.getItem(checkStorageKey())||'null');
     return saved&&typeof saved==='object'?{...initial,...saved}:initial;
   }catch{return initial}
 }
 let CHECK_STATE={};
-function saveCheck(){try{localStorage.setItem('financas-steles-checklist-v2',JSON.stringify(CHECK_STATE))}catch(e){/* ambiente sem armazenamento persistente */}}
+function saveCheck(){try{localStorage.setItem(checkStorageKey(),JSON.stringify(CHECK_STATE))}catch(e){/* ambiente sem armazenamento persistente */}}
 function renderDashboardChecklist(){
   const paid=DATA.check.filter((x,i)=>CHECK_STATE[i]).length,pending=DATA.check.length-paid;
   document.getElementById('dashboard-checklist').innerHTML=`<div class="dashboard-check-head"><strong>${paid} de ${DATA.check.length} pagos</strong><span class="tag">${pending} pendentes</span></div><div class="dashboard-check-list">${DATA.check.map((x,i)=>{const ok=!!CHECK_STATE[i];return `<div class="dashboard-check-row"><span>${x.conta}</span><strong class="${ok?'status-ok':'status-pending'}">${ok?'Concluído':'Pendente'}</strong></div>`}).join('')}</div>`;
@@ -862,23 +982,8 @@ function renderNuConta(){
   renderWaterfall('nu-waterfall',{full:true});
 }
 const COMP_OPEN={nubank:false,contas:false};
-function isoToBR(iso){return iso?iso.split('-').reverse().join('/'):''}
 function renderComp(){
-  const locked=DATA.comp.locked,pending=!!(locked&&norm(locked.status)!=='recebido');
   document.getElementById('comp-total').textContent=BRL(DATA.comp.total);
-  const pendingBlock=document.getElementById('comp-pending-hero'),noticeEl=document.getElementById('comp-lock-notice');
-  if(pending){
-    pendingBlock.style.display='';
-    document.getElementById('comp-pending-value').textContent=BRL(locked.value);
-    document.getElementById('comp-pending-date').textContent=locked.date?`Fixado em ${isoToBR(locked.date)}`:'';
-    const diff=DATA.comp.total-locked.value,noChange=Math.abs(diff)<0.5;
-    const diffTxt=noChange?'O valor ao vivo abaixo ainda é igual ao valor em aberto — nada novo entrou na planilha desde a fixação.':`Desde a fixação, a planilha já soma ${BRL(DATA.comp.total)} (${diff>=0?'+':'−'}${BRL(Math.abs(diff))}) — essa diferença entra no próximo fechamento, depois que Stella enviar o valor em aberto.`;
-    noticeEl.style.display='';
-    noticeEl.innerHTML=`<span><strong>Aguardando Stella enviar o valor em aberto.</strong> ${diffTxt}</span>`;
-  }else{
-    pendingBlock.style.display='none';
-    noticeEl.style.display='none';
-  }
   const principal=DATA.comp.items.filter(x=>!x.isTotal&&!x.isSub);
   const itau=principal.find(x=>x.d==='Cartão Itaú')?.s||0,nb=principal.find(x=>x.d==='Cartão NuBank')?.s||0,contas=principal.find(x=>x.d==='Contas')?.s||0;
   document.getElementById('comp-summary').innerHTML=[
@@ -907,209 +1012,24 @@ function renderCompTable(){
   document.getElementById('comp-table').innerHTML=html;
   document.querySelectorAll('[data-comp]').forEach(row=>row.addEventListener('click',()=>{const key=row.dataset.comp;COMP_OPEN[key]=!COMP_OPEN[key];renderCompTable()}));
 }
-
-/* ===================== Leitura do financas.xlsx ===================== */
-function sheetRows(wb,name){
-  const ws=wb.Sheets[name];
-  if(!ws||!ws['!ref']) return [];
-  const range=XLSX.utils.decode_range(ws['!ref']);
-  range.s.r=0;range.s.c=0;
-  const normalizedRef=XLSX.utils.encode_range(range);
-  return XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:null,range:normalizedRef});
-}
-function cell(rows,r,c){
-  const row=rows[r];
-  if(!row) return null;
-  const v=row[c];
-  return v===undefined?null:v;
-}
-function numOr0(v){const n=Number(v);return Number.isFinite(n)?n:0}
-function txtOr(v){return v===null||v===undefined?'':String(v).trim()}
-function toISODate(v){
-  if(!v) return null;
-  const d=v instanceof Date?v:new Date(v);
-  if(isNaN(d)) return null;
-  const y=d.getFullYear();
-  if(y<2000) return null;
-  const m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
-  return `${y}-${m}-${day}`;
-}
-function parseSaldo(rows){
-  const g=r=>numOr0(cell(rows,r,2)),s=r=>numOr0(cell(rows,r,4));
-  return{
-    salGui:g(4),salSte:s(4),
-    sobraGui:g(2),sobraSte:s(2),
-    nbGui:g(8),nbSte:s(8),
-    contasGui:g(10),contasSte:s(10),
-    compGui:g(18),compSte:s(18),
-    nucontaGui:g(21),nucontaSte:s(21),
-    poupancaGui:g(22),poupancaSte:s(22)
-  };
-}
-function parseCardSheet(rows,{headerRow,totalsRow}){
-  const totals={
-    total:numOr0(cell(rows,totalsRow,3)),
-    gui:numOr0(cell(rows,totalsRow,4)),
-    ste:numOr0(cell(rows,totalsRow,5)),
-    pais:numOr0(cell(rows,totalsRow,6))
-  };
-  const entries=[];
-  for(let r=headerRow+1;r<rows.length;r++){
-    const d=txtOr(cell(rows,r,3));
-    if(!d) continue;
-    const pagaRaw=cell(rows,r,16);
-    entries.push({
-      d,
-      r1:txtOr(cell(rows,r,4)),
-      r2:txtOr(cell(rows,r,5)),
-      r3:txtOr(cell(rows,r,6)),
-      vt:numOr0(cell(rows,r,8)),
-      m:txtOr(cell(rows,r,9)),
-      cat:txtOr(cell(rows,r,10)),
-      vp:numOr0(cell(rows,r,11)),
-      vr:numOr0(cell(rows,r,12)),
-      n:numOr0(cell(rows,r,13))||1,
-      first:toISODate(cell(rows,r,14)),
-      last:toISODate(cell(rows,r,15)),
-      paga:(pagaRaw===null||pagaRaw==='')?null:Number(pagaRaw)
-    });
-  }
-  return{totals,entries};
-}
-function parseContas(rows){
-  const headerRow=1,list=[];
-  for(let r=headerRow+1;r<rows.length;r++){
-    const d=txtOr(cell(rows,r,3));
-    if(!d) continue;
-    list.push({
-      d,
-      r1:txtOr(cell(rows,r,4)),
-      r2:txtOr(cell(rows,r,5)),
-      r3:txtOr(cell(rows,r,6)),
-      v:numOr0(cell(rows,r,8)),
-      pr:numOr0(cell(rows,r,10))
-    });
-  }
-  return list;
-}
-function parseComp(rows){
-  const items=[];
-  let total=0,mode=null,lockedValue=null,lockedDate=null,lockedStatus=null;
-  for(let r=0;r<rows.length;r++){
-    const raw=cell(rows,r,1);
-    if(raw===null) continue;
-    const trimmed=String(raw).trim();
-    if(!trimmed) continue;
-    const sVal=numOr0(cell(rows,r,2)),gVal=numOr0(cell(rows,r,3));
-    const lower=trimmed.toLowerCase();
-    if(lower.includes('valor fixado')){lockedValue=sVal;continue}
-    if(lower.includes('data de fixa')){lockedDate=toISODate(cell(rows,r,2));continue}
-    if(lower.includes('status') && lower.includes('pagamento')){lockedStatus=txtOr(cell(rows,r,2));continue}
-    if(lower.includes('transferir')){
-      items.push({isTotal:true,d:trimmed,s:sVal,g:0});
-      total=sVal;mode=null;continue;
-    }
-    if(trimmed==='Cartão Itaú'||trimmed==='Cartão NuBank'){
-      items.push({d:trimmed,s:sVal,g:gVal,isSub:false,expandable:trimmed==='Cartão NuBank'});
-      mode=null;continue;
-    }
-    if(trimmed==='Contas'){
-      items.push({d:trimmed,s:sVal,g:0,isSub:false,expandable:true});
-      mode='contas';continue;
-    }
-    if(mode==='contas'){
-      items.push({d:trimmed,s:sVal,g:0,isSub:true,expandable:false});
-    }
-  }
-  const locked=(lockedValue!==null&&lockedValue>0.005)?{value:lockedValue,date:lockedDate,status:lockedStatus||'Aguardando'}:null;
-  return{items,total,locked};
-}
-function parseNuConta(rows){
-  const caixGui=numOr0(cell(rows,10,6)),caixSte=numOr0(cell(rows,10,7));
-  const initialBalance=numOr0(cell(rows,11,6));
-  const reservedTotal=numOr0(cell(rows,2,13));
-  const reserved=[];
-  for(let r=4;r<=7;r++){
-    const label=txtOr(cell(rows,r,11));
-    if(!label||label.toLowerCase().includes('movimenta')) continue;
-    reserved.push({d:label,v:numOr0(cell(rows,r,13))});
-  }
-  const movsCaixinha=[];
-  for(let r=14;r<rows.length;r++){
-    const label=txtOr(cell(rows,r,5));
-    if(!label) continue;
-    movsCaixinha.push({d:label,v:numOr0(cell(rows,r,6))});
-  }
-  return{caixGui,caixSte,initialBalance,movsCaixinha,reserved,reservedTotal};
-}
-function parseCheck(rows){
-  const list=[];
-  for(let r=1;r<rows.length;r++){
-    const conta=txtOr(cell(rows,r,1));
-    if(!conta) continue;
-    list.push({conta,status:txtOr(cell(rows,r,2)),obs:txtOr(cell(rows,r,3))});
-  }
-  return list;
-}
-function buildDataFromWorkbook(wb){
-  const saldo=parseSaldo(sheetRows(wb,'Saldo'));
-  const comp=parseComp(sheetRows(wb,'Compensasões e Transferências'));
-  const itau=parseCardSheet(sheetRows(wb,'Itaú'),{headerRow:3,totalsRow:1});
-  const nb=parseCardSheet(sheetRows(wb,'NuBank'),{headerRow:4,totalsRow:1});
-  const contas=parseContas(sheetRows(wb,'Contas'));
-  const nuconta=parseNuConta(sheetRows(wb,'NuConta e Poupança'));
-  const check=parseCheck(sheetRows(wb,'Checklist de pagamento'));
-
-  const now=new Date();
-  const invoiceDate=new Date(now.getFullYear(),now.getMonth()+1,1);
-  const updated=now.toLocaleDateString('pt-BR');
-  const invoiceMonth=`${invoiceDate.getFullYear()}-${String(invoiceDate.getMonth()+1).padStart(2,'0')}-01`;
-
-  return{meta:{updated,invoiceMonth},saldo,nb,itau,contas,comp,nuconta,check};
-}
-async function loadData(){
-  try{
-    const res=await fetch(`./financas.xlsx?v=${Date.now()}`);
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    const buf=await res.arrayBuffer();
-    const wb=XLSX.read(buf,{type:'array',cellDates:true});
-    DATA=buildDataFromWorkbook(wb);
-    REF_DATE=new Date(`${DATA.meta.invoiceMonth}T00:00:00`);
-    CHECK_STATE=getCheckState();
-    init();
-  }catch(err){
-    console.error('Falha ao carregar financas.xlsx',err);
-    const el=document.getElementById('base-date');
-    if(el) el.textContent='Erro ao carregar financas.xlsx';
-    document.querySelector('main').insertAdjacentHTML('afterbegin',
-      `<div class="notice"><span><strong>Não foi possível carregar financas.xlsx.</strong> Verifique se o arquivo está na mesma pasta do index.html e recarregue a página.</span></div>`);
-  }
-}
-/* =================================================================== */
-function init(){
-  document.getElementById('main-title').textContent=`Finanças Steles - ${DATA.meta.updated}`;
-  document.title=`Finanças Steles - ${DATA.meta.updated}`;
-  document.getElementById('base-date').textContent=`Atualizado via planilha • ${DATA.meta.updated}`;
-  renderDashboard();renderSummary();renderCards();renderContas();renderProjection();renderNuConta();renderComp();renderCheck();
+async function init(){
+  setLoading(true,'Lendo financas.xlsx e financas_anterior.xlsx…');
+  const results=await Promise.allSettled([loadSnapshot('current'),loadSnapshot('previous')]);
+  if(results[0].status==='fulfilled') SNAPSHOTS.current=results[0].value;
+  else {console.error('[Atual]',results[0].reason);throw new Error('Não foi possível carregar financas.xlsx. Verifique se o arquivo está na mesma pasta do index.html.')}
+  if(results[1].status==='fulfilled') SNAPSHOTS.previous=results[1].value;
+  else console.warn('[Anterior] financas_anterior.xlsx não carregado:',results[1].reason);
+  ACTIVE_SNAPSHOT='current';DATA=SNAPSHOTS.current;renderAllViews();
   document.getElementById('nb-search').addEventListener('input',renderNbTable);
-  document.querySelectorAll('#nb-filters .chip').forEach(b=>b.addEventListener('click',()=>{
-    nbFilter=b.dataset.filter;document.querySelectorAll('#nb-filters .chip').forEach(x=>x.classList.toggle('active',x===b));renderNbTable();
-  }));
-  document.querySelectorAll('#projection-switch button').forEach(b=>b.addEventListener('click',()=>{
-    projMode=b.dataset.mode;document.querySelectorAll('#projection-switch button').forEach(x=>x.classList.toggle('active',x===b));renderProjection();
-  }));
-  document.getElementById('check-reset').addEventListener('click',()=>{
-    try{localStorage.removeItem('financas-steles-checklist-v2')}catch(e){}CHECK_STATE=Object.fromEntries(DATA.check.map((x,i)=>[i,norm(x.status)==='ok']));renderCheck();renderDashboardChecklist();
-  });
+  document.querySelectorAll('#nb-filters .chip').forEach(b=>b.addEventListener('click',()=>{nbFilter=b.dataset.filter;document.querySelectorAll('#nb-filters .chip').forEach(x=>x.classList.toggle('active',x===b));renderNbTable()}));
+  document.querySelectorAll('#projection-switch button').forEach(b=>b.addEventListener('click',()=>{projMode=b.dataset.mode;document.querySelectorAll('#projection-switch button').forEach(x=>x.classList.toggle('active',x===b));renderProjection()}));
+  document.getElementById('check-reset').addEventListener('click',()=>{try{localStorage.removeItem(checkStorageKey())}catch(e){}CHECK_STATE=Object.fromEntries(DATA.check.map((x,i)=>[i,norm(x.status)==='ok']));renderCheck();renderDashboardChecklist()});
   document.querySelectorAll('[role="button"][data-go]').forEach(x=>x.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openPage(x.dataset.go)}}));
-  let projectionResizeTimer;
-  window.addEventListener('resize',()=>{
-    if(!document.getElementById('page-parcelas').classList.contains('active')) return;
-    clearTimeout(projectionResizeTimer);
-    projectionResizeTimer=setTimeout(renderProjection,120);
-  });
+  document.querySelectorAll('[data-version]').forEach(b=>b.addEventListener('click',()=>activateSnapshot(b.dataset.version)));
+  let projectionResizeTimer;window.addEventListener('resize',()=>{if(!document.getElementById('page-parcelas').classList.contains('active'))return;clearTimeout(projectionResizeTimer);projectionResizeTimer=setTimeout(renderProjection,120)});
+  setLoading(false);
 }
-loadData();
+init().catch(err=>{console.error(err);const box=document.querySelector('#data-loading .loading-box');if(box){box.innerHTML=`<strong style="color:var(--red)">Erro ao carregar os dados</strong><span>${err.message}</span>`;document.getElementById('data-loading').hidden=false}else{setLoading(false)}document.getElementById('base-date').textContent='Erro ao carregar a base'});
 
 </script>
 </body>
