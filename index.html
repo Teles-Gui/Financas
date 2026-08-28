@@ -131,6 +131,8 @@ tbody tr:hover{background:#faf8f3}tbody tr:last-child td{border-bottom:0}.money{
 .progress-fill{height:100%;background:var(--green);border-radius:999px}.progress span{font-size:8px;color:var(--muted)}
 .comp-hero{background:linear-gradient(135deg,var(--navy),#354f6a 55%,var(--purple));color:#fff;border-radius:var(--radius);
   padding:25px;box-shadow:0 18px 36px rgba(37,59,82,.2);display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:25px;margin-bottom:18px}
+.comp-hero.comp-pending{background:linear-gradient(135deg,var(--orange),#c9793f 55%,var(--yellow));box-shadow:0 18px 36px rgba(200,101,50,.25)}
+.comp-pending-date{font-size:9px;color:rgba(255,255,255,.72);margin-top:2px}
 .comp-person{text-align:center}.comp-person .avatar{margin:0 auto 8px;background:rgba(255,255,255,.13);color:#fff}.comp-person strong{display:block;font-size:14px}.comp-person span{font-size:9px;color:rgba(255,255,255,.62)}
 .comp-center{text-align:center}.comp-center .label{font-size:9px;color:rgba(255,255,255,.63);text-transform:uppercase;font-weight:800;letter-spacing:.7px}.comp-center .value{font-size:31px;font-weight:950;letter-spacing:-1px;margin:4px 0}.comp-arrow{height:2px;width:140px;background:rgba(255,255,255,.35);position:relative;margin:12px auto 0}.comp-arrow::after{content:"";position:absolute;right:-1px;top:-4px;border-left:8px solid rgba(255,255,255,.65);border-top:5px solid transparent;border-bottom:5px solid transparent}
 .comp-row.expandable{cursor:pointer}.comp-row.expandable:hover{background:var(--purple-soft)}.comp-sub{background:#faf7fc}.comp-total td{font-weight:900;background:var(--purple-soft);color:var(--purple)}
@@ -449,11 +451,17 @@ tbody tr:hover{background:#faf8f3}tbody tr:last-child td{border-bottom:0}.money{
 
     <section id="page-comp" class="page">
       <div class="page-head"><div><h2>Compensações</h2><p>Detalhamento do que Stella precisa transferir a Guilherme.</p></div><span class="tag">Fechamento</span></div>
+      <div id="comp-pending-hero" class="comp-hero comp-pending" style="display:none">
+        <div class="comp-person"><div class="avatar ste">S</div><strong>Stella</strong><span>ainda não enviou</span></div>
+        <div class="comp-center"><div class="label">Em aberto — Referente ao último mês</div><div id="comp-pending-value" class="value"></div><div id="comp-pending-date" class="comp-pending-date"></div><div class="comp-arrow"></div></div>
+        <div class="comp-person"><div class="avatar">GT</div><strong>Guilherme</strong><span>aguardando recebimento</span></div>
+      </div>
       <div class="comp-hero">
         <div class="comp-person"><div class="avatar ste">S</div><strong>Stella</strong><span>origem da transferência</span></div>
         <div class="comp-center"><div class="label">Transferência para Guilherme</div><div id="comp-total" class="value"></div><div class="comp-arrow"></div></div>
         <div class="comp-person"><div class="avatar">GT</div><strong>Guilherme</strong><span>recebe o acerto</span></div>
       </div>
+      <div id="comp-lock-notice" class="notice" style="display:none"></div>
       <article class="card">
         <div class="card-head"><div><h3>Resumo do fechamento</h3><p class="card-desc">Cartões e contas que formam a transferência.</p></div></div>
         <div id="comp-summary" class="comp-breakdown comp-summary-grid"></div>
@@ -549,10 +557,22 @@ function parseContas(wb){
   for(let i=data.indexOf(header)+1;i<data.length;i++){const row=data[i],d=rawStr(row[desc]),v=rawNum(row[vt]);if(!d||!v)continue;out.push({d,r1:rawStr(row[desc+1]),r2:rawStr(row[desc+2]),r3:rawStr(row[desc+3]),v,pr:rawNum(row[pr])})}return out;
 }
 function parseComp(wb){
-  const data=sheetRows(wb,'Compensas'),hdr=data.find(row=>row.some(c=>normRaw(c)==='stella'));if(!hdr)return {items:[],total:0};
+  const data=sheetRows(wb,'Compensas'),hdr=data.find(row=>row.some(c=>normRaw(c)==='stella'));if(!hdr)return {items:[],total:0,locked:null};
   const st=hdr.findIndex(c=>normRaw(c)==='stella'),g=hdr.findIndex(c=>normRaw(c)==='guilherme'),lbl=Math.max(0,st-1),items=[];
-  data.forEach(row=>{const raw=row[lbl],d=rawStr(raw);if(!d||normRaw(d)==='stella'||normRaw(d)==='guilherme')return;const sv=rawNum(row[st]),gv=g>=0?rawNum(row[g]):0;if(normRaw(d).includes('stella tem que'))items.push({isTotal:true,d,s:sv,g:0});else items.push({d,s:sv,g:gv,isSub:String(raw??'').startsWith(' '),expandable:d==='Cartão NuBank'||d==='Contas'})});
-  return {items,total:items.find(x=>x.isTotal)?.s||0};
+  let lockedValue=null,lockedDate=null,lockedStatus=null;
+  data.forEach(row=>{
+    const raw=row[lbl],d=rawStr(raw);
+    if(!d||normRaw(d)==='stella'||normRaw(d)==='guilherme')return;
+    const dn=normRaw(d);
+    if(dn.includes('valor fixado')){lockedValue=rawNum(row[st]);return}
+    if(dn.includes('data de fixa')){lockedDate=excelDateISO(row[st]);return}
+    if(dn.includes('status')&&dn.includes('pagamento')){lockedStatus=rawStr(row[st]);return}
+    const sv=rawNum(row[st]),gv=g>=0?rawNum(row[g]):0;
+    if(dn.includes('stella tem que'))items.push({isTotal:true,d,s:sv,g:0});
+    else items.push({d,s:sv,g:gv,isSub:String(raw??'').startsWith(' '),expandable:d==='Cartão NuBank'||d==='Contas'});
+  });
+  const locked=(lockedValue!==null&&lockedValue>0.005)?{value:lockedValue,date:lockedDate,status:lockedStatus||'Aguardando'}:null;
+  return {items,total:items.find(x=>x.isTotal)?.s||0,locked};
 }
 function parseNuConta(wb){
   const data=sheetRows(wb,'NuConta');let caixGui=0,caixSte=0,gcol=-1,scol=-1;const movsCaixinha=[],reserved=[];let initialBalance=null;
@@ -567,7 +587,7 @@ function parseNuConta(wb){
 function parseChecklist(wb){
   const data=sheetRows(wb,'Checklist');if(!data.length)return [];
   let header=null,desc=-1,status=-1,obs=-1;
-  for(const row of data){const st=row.findIndex(c=>normRaw(c)==='status');if(st>=0){header=row;status=st;desc=row.findIndex(c=>['conta','descricao','pagamento'].some(t=>normRaw(c).includes(t)));if(desc<0)desc=Math.max(0,st-1);obs=row.findIndex(c=>normRaw(c).includes('obs'));break}}
+  for(const row of data){const st=row.findIndex(c=>{const n=normRaw(c);return n==='status'||n.includes('pago')});if(st>=0){header=row;status=st;desc=row.findIndex((c,i)=>i!==st&&['conta','descricao','pagamento'].some(t=>normRaw(c).includes(t)));if(desc<0)desc=Math.max(0,st-1);obs=row.findIndex(c=>normRaw(c).includes('obs'));break}}
   if(!header)return [];
   const out=[];for(let i=data.indexOf(header)+1;i<data.length;i++){const row=data[i],conta=rawStr(row[desc]);if(!conta)continue;out.push({conta,status:rawStr(row[status]),obs:obs>=0?rawStr(row[obs]):''})}return out;
 }
@@ -982,8 +1002,23 @@ function renderNuConta(){
   renderWaterfall('nu-waterfall',{full:true});
 }
 const COMP_OPEN={nubank:false,contas:false};
+function isoToBR(iso){return iso?iso.split('-').reverse().join('/'):''}
 function renderComp(){
+  const locked=DATA.comp.locked,pending=!!(locked&&norm(locked.status)!=='recebido');
   document.getElementById('comp-total').textContent=BRL(DATA.comp.total);
+  const pendingBlock=document.getElementById('comp-pending-hero'),noticeEl=document.getElementById('comp-lock-notice');
+  if(pending){
+    pendingBlock.style.display='';
+    document.getElementById('comp-pending-value').textContent=BRL(locked.value);
+    document.getElementById('comp-pending-date').textContent=locked.date?`Fixado em ${isoToBR(locked.date)}`:'';
+    const diff=DATA.comp.total-locked.value,noChange=Math.abs(diff)<0.5;
+    const diffTxt=noChange?'O valor ao vivo abaixo ainda é igual ao valor em aberto — nada novo entrou na planilha desde a fixação.':`Desde a fixação, a planilha já soma ${BRL(DATA.comp.total)} (${diff>=0?'+':'−'}${BRL(Math.abs(diff))}) — essa diferença entra no próximo fechamento, depois que Stella enviar o valor em aberto.`;
+    noticeEl.style.display='';
+    noticeEl.innerHTML=`<span><strong>Aguardando Stella enviar o valor em aberto.</strong> ${diffTxt}</span>`;
+  }else{
+    pendingBlock.style.display='none';
+    noticeEl.style.display='none';
+  }
   const principal=DATA.comp.items.filter(x=>!x.isTotal&&!x.isSub);
   const itau=principal.find(x=>x.d==='Cartão Itaú')?.s||0,nb=principal.find(x=>x.d==='Cartão NuBank')?.s||0,contas=principal.find(x=>x.d==='Contas')?.s||0;
   document.getElementById('comp-summary').innerHTML=[
