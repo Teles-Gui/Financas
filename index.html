@@ -1004,7 +1004,7 @@ function renderNuConta(){
 const COMP_OPEN={nubank:false,contas:false};
 function isoToBR(iso){return iso?iso.split('-').reverse().join('/'):''}
 function renderComp(){
-  const locked=DATA.comp.locked,pending=!!(locked&&norm(locked.status)!=='recebido');
+  const locked=DATA.comp.locked,pending=!!(locked&&!['recebido','pago','paga','quitado'].includes(norm(locked.status)));
   document.getElementById('comp-total').textContent=BRL(DATA.comp.total);
   const pendingBlock=document.getElementById('comp-pending-hero'),noticeEl=document.getElementById('comp-lock-notice');
   if(pending){
