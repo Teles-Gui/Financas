@@ -1054,6 +1054,9 @@ async function init(){
   else {console.error('[Atual]',results[0].reason);throw new Error('Não foi possível carregar financas.xlsx. Verifique se o arquivo está na mesma pasta do index.html.')}
   if(results[1].status==='fulfilled') SNAPSHOTS.previous=results[1].value;
   else console.warn('[Anterior] financas_anterior.xlsx não carregado:',results[1].reason);
+  const nextMonth=new Date(new Date().getFullYear(),new Date().getMonth()+1,1),inferred=new Date(`${SNAPSHOTS.current.meta.invoiceMonth}T00:00:00`),currentRef=inferred>nextMonth?inferred:nextMonth;
+  SNAPSHOTS.current.meta.invoiceMonth=monthKeyISO(currentRef);
+  if(SNAPSHOTS.previous) SNAPSHOTS.previous.meta.invoiceMonth=monthKeyISO(addMonths(currentRef,-1));
   ACTIVE_SNAPSHOT='current';DATA=SNAPSHOTS.current;renderAllViews();
   document.getElementById('nb-search').addEventListener('input',renderNbTable);
   document.querySelectorAll('#nb-filters .chip').forEach(b=>b.addEventListener('click',()=>{nbFilter=b.dataset.filter;document.querySelectorAll('#nb-filters .chip').forEach(x=>x.classList.toggle('active',x===b));renderNbTable()}));
