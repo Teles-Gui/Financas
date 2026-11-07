@@ -93,6 +93,15 @@ h1{font-size:37px;line-height:1.02;letter-spacing:-1.6px;margin:0}
 .person-card.ste .flow-fill{background:var(--orange)}.flow-value{text-align:right;font-size:10px;font-weight:800;font-variant-numeric:tabular-nums}
 .person-summary{margin-top:13px;padding-top:13px;border-top:1px solid var(--line);display:flex;justify-content:space-between;color:var(--muted);font-size:10px}
 .person-summary strong{color:var(--ink)}
+.sim-box{margin:0 20px 20px;padding:13px 14px;border:1px dashed var(--line);border-radius:12px;background:rgba(200,101,50,.05)}
+.sim-box.active{border-style:solid;border-color:var(--orange);background:rgba(200,101,50,.1)}
+.sim-box label{display:block;font-size:8px;text-transform:uppercase;font-weight:850;letter-spacing:.5px;color:var(--muted);margin-bottom:7px}
+.sim-row{display:flex;align-items:center;gap:8px}
+.sim-prefix{font-size:11px;font-weight:800;color:var(--muted)}
+.sim-row input{flex:1;min-width:0;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font:inherit;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;background:var(--surface);color:var(--ink)}
+.sim-row input:focus{outline:2px solid var(--orange);outline-offset:1px}
+.sim-row button:disabled{opacity:.4;cursor:default}
+.sim-note{margin:8px 0 0;font-size:9px;color:var(--muted);line-height:1.4}
 .house-details{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
 .house-details summary{list-style:none;cursor:pointer;padding:15px 18px;font-size:11px;font-weight:850;display:flex;justify-content:space-between;align-items:center}
 .house-details summary::-webkit-details-marker{display:none}.house-details summary::after{content:"＋";color:var(--green);font-size:18px}
@@ -619,7 +628,35 @@ function updateSnapshotUI(){
   document.getElementById('main-title').textContent=`Finanças Steles - ${DATA.meta.updated}`;document.title=`Finanças Steles - ${DATA.meta.updated}`;
   document.getElementById('base-date').textContent=`${ACTIVE_SNAPSHOT==='current'?'Atual':'Anterior'} • Fatura ${snapshotMonthLabel(DATA)}`;
 }
+const ITAU_KEY='financas-steles-itau-stella-v1';
+function getItauOverride(){try{const v=localStorage.getItem(ITAU_KEY);if(v===null||v==='')return null;const n=Number(v);return isFinite(n)&&n>=0?n:null}catch(e){return null}}
+function setItauOverride(n){try{n===null?localStorage.removeItem(ITAU_KEY):localStorage.setItem(ITAU_KEY,String(n))}catch(e){/* sem armazenamento */}}
+function parseBRInput(txt){const t=String(txt||'').replace(/[^\d,.-]/g,'');if(!t)return null;const n=Number(t.includes(',')?t.replace(/\./g,'').replace(',','.'):t);return isFinite(n)&&n>=0?Math.round(n*100)/100:null}
+function applyItauOverride(){
+  const row=DATA.contas.find(x=>normRaw(x.d).includes('itau')&&normRaw(x.d).includes('stella'));DATA.itauSim=null;if(!row)return;
+  if(row.v0===undefined){row.v0=row.v;row.pr0=row.pr;DATA.saldo.contasSte0=DATA.saldo.contasSte;DATA.saldo.sobraSte0=DATA.saldo.sobraSte}
+  const ov=ACTIVE_SNAPSHOT==='current'?getItauOverride():null,delta=ov===null?0:ov-row.v0;
+  row.v=row.v0+delta;row.pr=row.pr0+delta;DATA.saldo.contasSte=DATA.saldo.contasSte0+delta;DATA.saldo.sobraSte=DATA.saldo.sobraSte0-delta;
+  DATA.itauSim={excel:row.v0,active:ov!==null&&Math.abs(delta)>.004,delta,editable:ACTIVE_SNAPSHOT==='current'};
+}
+function itauSimBox(){
+  const sim=DATA.itauSim;if(!sim||!sim.editable)return '';
+  const fmt=n=>new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n),cur=sim.excel+sim.delta;
+  return `<div class="sim-box${sim.active?' active':''}"><label for="itau-sim-input">Cartão Itaú da Stella · projeção</label>
+    <div class="sim-row"><span class="sim-prefix">R$</span><input id="itau-sim-input" type="text" inputmode="decimal" autocomplete="off" value="${fmt(cur)}" aria-label="Valor do cartão Itaú da Stella"><button id="itau-sim-reset" class="secondary-btn" type="button"${sim.active?'':' disabled'}>Voltar ao Excel</button></div>
+    <p class="sim-note">${sim.active?`Projeção ativa: Excel tem ${BRL(sim.excel)}; a sobra foi ajustada em ${sim.delta>0?'−':'+'} ${BRL(Math.abs(sim.delta))}.`:`Valor do Excel: ${BRL(sim.excel)}. Altere para ver a nova sobra.`} Fica salvo só neste navegador.</p></div>`;
+}
+function bindItauSim(){
+  const inp=document.getElementById('itau-sim-input'),rst=document.getElementById('itau-sim-reset');
+  if(inp){
+    inp.addEventListener('change',()=>{const n=parseBRInput(inp.value),base=DATA.itauSim?DATA.itauSim.excel:0;setItauOverride(n===null||Math.abs(n-base)<.005?null:n);renderAllViews()});
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur()});
+    inp.addEventListener('focus',()=>inp.select());
+  }
+  if(rst)rst.addEventListener('click',()=>{setItauOverride(null);renderAllViews()});
+}
 function renderAllViews(){
+  applyItauOverride();
   REF_DATE=new Date(`${DATA.meta.invoiceMonth}T00:00:00`);CHECK_STATE=getCheckState();COMP_OPEN.nubank=false;COMP_OPEN.contas=false;
   renderDashboard();renderSummary();renderCards();renderContas();renderProjection();renderNuConta();renderComp();renderCheck();updateSnapshotUI();
 }
@@ -753,8 +790,9 @@ function renderSummary(){
         <div class="person-kpi"><span>Sobra da renda</span><strong>${p.salary?((p.balance/p.salary)*100).toFixed(1).replace('.',','):'0,0'}%</strong></div></div>
       <div class="person-flow">${first}${accountDetails(p.key,p.fixed,max)}${after}
         <div class="person-summary"><span>Total que sai <strong>${BRL(out)}</strong></span></div>
-      </div></article>`;
+      </div>${p.key==='stella'?itauSimBox():''}</article>`;
   }).join('');
+  bindItauSim();
   const income=s.salGui+s.salSte,balance=s.sobraGui+s.sobraSte,out=income-balance;
   document.getElementById('house-kpis').innerHTML=
     kpiCard('Renda conjunta',income,'Visão agregada da casa','good')+
